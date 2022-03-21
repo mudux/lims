@@ -98,13 +98,16 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	# "*": {
+	# 	"on_update": "method",
+	# 	"on_cancel": "method",
+	# 	"on_trash": "method"
+	# },
+    "Lab Test":{
+        # "on_update": "lims.doc_hooks.lab_test.lab_test_after_insert_hook"
+    }
+}
 
 # Scheduled Tasks
 # ---------------
