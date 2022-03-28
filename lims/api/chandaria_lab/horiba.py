@@ -19,7 +19,7 @@ def process_horiba_hl7(HL7Message):
     result_data = json.loads(hl7_data)
     pid_data = result_data["PID"]
     patient_number = pid_data["PID.3"]["PID.3.1"] if pid_data["PID.3"] else 'No Patient Number'
-    patient_dob = pid_data["PID.7"]["PID.7.1"] if pid_data["PID.7"] else 'No Patient Number'
+    patient_dob = pid_data["PID.7"]["PID.7.1"] if pid_data["PID.7"] else 'No Patient DOB'
     patient_info={'patient_number':patient_number,'patient_dob':patient_dob}
     spm_data = result_data["SPM"]
     specimen_number = spm_data["SPM.2"]["SPM.2.1"] if spm_data["SPM.2"] else 'No specimen Number'

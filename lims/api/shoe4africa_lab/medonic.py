@@ -24,7 +24,7 @@ def process_medonic_hl7(HL7Message):
     # parse hl7 data
     hl7_data = frappe.db.get_value('HL7 Message Logs',{'name':message_log.get('name')},'hl7')
     result_data = json.loads(hl7_data)
-    print(str(result_data))
+    # print(str(result_data))
     if len(result_data)>1:
         obr_data = result_data["OBR"]
         obr_filler_order_sample_number = obr_data["OBR.3"]["OBR.3.1"] if obr_data["OBR.3"] else 'No Filler Order Number'

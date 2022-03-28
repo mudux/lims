@@ -12,7 +12,8 @@ def calculate_age(birthDate):
     age = int((date.today() - birthDate).days / days_in_year)
     return age
 
-def get_template_name(lab_name,astm_codes=['592','551','495','609','712']):
+def get_template_name(lab_name):
+    # astm_codes=['592','551','495','609','712']
     tests_sharing_sample_child =  frappe.db.get_all('Lab Test Sample Share',filters={'lab_test':['IN',lab_name]},fields=['name','lab_test','parent'])
     tests_sharing_sample_parent =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':lab_name},fields=['name','lab_test','parent'])
     tests_sharing_sample = tests_sharing_sample_parent or tests_sharing_sample_child
@@ -29,14 +30,18 @@ def get_template_name(lab_name,astm_codes=['592','551','495','609','712']):
     template_names = [x.template for x in templates]
     # lab_test_code = frappe.db.get_all('Lab Test Codes',filters={'astm_code': ['IN', astm_codes]},fields=['lab_test_template','analysis','astm_code'])
     lab_test_code = frappe.db.get_all('Lab Test Codes',filters={'lab_test_template': ['IN',template_names ]},fields=['lab_test_template','analysis','astm_code'])
-    print(template_names)
-    print(test_names)
-    print(lab_test_code)
+    # print(template_names)
+    # print(test_names)
+    # print(lab_test_code)
     return lab_test_code
 
+@frappe.whitelist(allow_guest=True)
+def get_test_name(OrderNumber):
+    data = get_template_name(OrderNumber)
+    return data
 
 @frappe.whitelist(allow_guest=True)
-def get_order_details(OrderNumber='79789'):
+def get_order_details(OrderNumber):
     test = create_random_test() # will use order# to get lab test
     url = 'http://172.16.0.45:9002'
     lab_test = frappe.get_doc('Lab Test',test)
@@ -50,7 +55,8 @@ def get_order_details(OrderNumber='79789'):
         'invoiced':'yes' if lab_test.get('invoiced')== 1 else 'No',
         'practitioner_name':lab_test.get('practitioner_name'),
         'lab_test_name':lab_test.get('name'),
-        'test_codes': get_template_name(lab_test.get('name')) #get_template_name(['592','551','495','609','712'])
+        'test_codes': get_template_name(lab_test.get('name')) 
+        #get_template_name(['592','551','495','609','712'])
     }
     x = requests.post(url, json = json.dumps(myobj))
     return {'message':'it works'}
@@ -70,7 +76,7 @@ def save_cobas_results(orderResult,OrderCount,ResultCount):
     else:
         return {'message':'Results Missing Data'}
 
-def process_astm_result(log_name='ASTM-LOG-22-03-26857'):
+def process_astm_result(log_name):
     # logs = frappe.db.get_all('ASTM Message Logs',filters={},fields=['*'])
     lab_name = create_random_test() #'HLC-LAB-2022-00024'
     # test_sharing_sample_with = frappe.db.get_value('Lab Test',{'name':lab_name},'share_sample_with')
@@ -82,9 +88,10 @@ def process_astm_result(log_name='ASTM-LOG-22-03-26857'):
         Orders = orderResult['orderResult']['Orders']
         Result = orderResult['orderResult']['Result']
         Uom = orderResult['orderResult']['Uom']
+        Ranges = orderResult['orderResult']['Ranges']
         output = "{0} processed {1} res {2}".format(orderNumber,log_name,Result)
         print(output)
-        results = append_order_to_test_and_results(Orders,Result,Uom)
+        results = append_order_to_test_and_results(Orders,Result,Uom,Ranges)
         print("result {0} {1}".format(orderNumber,str(results)))
         sorted_results = sorted(results, key=lambda d: d['template_name']) 
         frappe.db.set_value('ASTM Message Logs', log_name,{'result_data': json.dumps(sorted_results)})
@@ -106,7 +113,7 @@ def process_astm_result(log_name='ASTM-LOG-22-03-26857'):
 
 
 
-def append_order_to_test_and_results(orderlist,resultList,Uom):
+def append_order_to_test_and_results(orderlist,resultList,Uom,Ranges):
     if len(orderlist) == len(resultList):
         order_names = []
         for index in range(0,len(orderlist)):
@@ -118,6 +125,7 @@ def append_order_to_test_and_results(orderlist,resultList,Uom):
                     'template_name':lab_test_code[0]['lab_test_template'],
                     'analysis':lab_test_code[0]['analysis'],
                     'results':resultList[index],
+                    'range':Ranges[index],
                     'uom':Uom[index]})
             print('order_names {0}'.format(order_names))
         return order_names
@@ -134,18 +142,20 @@ def set_lab_test_result(log_name,test_name,result_list=[]):
     idx = 0
     sorted_results = sorted(result_list, key=lambda d: d['template_name']) 
     for result in sorted_results:
-        result_value = float(result['results'])
+        subString = "E+99"
+        result_value = result['results'][0:4] if subString in ['results'] else float(result['results'])
         formatted_result ='{:.{}f}'.format(result_value,2)
+        
         normal_test_items = lab_test.append('normal_test_items')
         normal_test_items.idx = idx
         normal_test_items.lab_test_name = result['template_name']
         normal_test_items.lab_test_event = result['analysis']
         normal_test_items.result_value = "{0}".format(formatted_result) #,result['uom'])
         normal_test_items.lab_test_uom = get_lab_uom(result['template_name']) #result['uom']
-        normal_test_items.normal_range = 'NA'
+        normal_test_items.normal_range = result['range']
         normal_test_items.lab_test_comment = 'NA'
         lab_test.save(ignore_permissions=True)
-        custom_result += list_body + "{0}\t{1}\t{2} {3}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'])
+        custom_result += list_body + "{0}\t{1}\t{2} {3} {4}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'],result['range'])
     idx+=1
     frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
     add_comment(reference_name=test_name, reference_doctype="Lab Test",content="ASTM Log Document {0}".format(log_name))
@@ -173,3 +183,28 @@ def get_lab_uom(lab_name):
     lab_test_uom = frappe.db.get_value('Lab Test Template',{'name':template},'lab_test_uom')
     secondary_uom = frappe.db.get_value('Lab Test Template',{'name':template},'secondary_uom')
     return lab_test_uom or secondary_uom
+
+def import_loinc():
+    from lims.api.utils.loinc_import import get_loinc
+    loinc_codes = get_loinc() 
+    count = 0
+    for loinc_code in loinc_codes:
+        code = dict(loinc_code)
+        args =  {
+            "doctype": "Loinc Code",
+            "code": code['Code'],
+            "description": code['Description'],
+            "property": code['Property'],
+            "class": code['Class'],
+            "units_required": code['Units Required'],
+            "related_names": code['Related Names'],
+            "short_name": code['Short Name'],
+            "order_obs":code['Order Obs'],
+            "uom":code['UOM']
+        }
+        # print(args)
+        doc = frappe.get_doc(args).insert()
+        count+=1
+        print("code {0} cnt {1}".format(code['Code'],count))
+    print('complete')
+

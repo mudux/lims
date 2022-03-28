@@ -105,7 +105,7 @@ doc_events = {
 	# 	"on_trash": "method"
 	# },
     "Lab Test":{
-        # "on_update": "lims.doc_hooks.lab_test.lab_test_after_insert_hook"
+        "after_insert": "lims.doc_hooks.lab_test.lab_test_after_insert_hook"
     }
 }
 
