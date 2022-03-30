@@ -1,8 +1,11 @@
 import json
 import frappe
-from lims.api.shoe4africa_lab.medonic import update_lab_test
+from lims.api.chandaria_lab.horiba import get_loinc_description
+from lims.api.shoe4africa_lab.cobas_400 import get_lab_uom
 from lims.api.shoe4africa_lab.yumizen_550 import get_template_name
 from lims.api.utils.lab_test import create_random_test
+from lims.api.utils.log_comments import add_comment
+from lims.api.utils.template_update import save_test_uom, update_template_uom
 
 @frappe.whitelist(allow_guest=True)
 def process_urised_hl7(HL7Message):
@@ -16,7 +19,7 @@ def process_urised_hl7(HL7Message):
     # parse hl7 data
     hl7_data = frappe.db.get_value('HL7 Message Logs',{'name':message_log.get('name')},'hl7')
     result_data = json.loads(hl7_data)
-    print(str(result_data))
+    # print(str(result_data))
     pid_data = result_data["PID"]
     patient_name = pid_data["PID.5"]["PID.5.1"] if pid_data["PID.3"] else 'No Patient Number'
     patient_dob = pid_data["PID.3"]["PID.3.1"] if pid_data["PID.3"] else 'No Patient DOB'
@@ -42,6 +45,7 @@ def process_urised_hl7(HL7Message):
         # obx_probability = obx_data["OBX.9"]["OBX.9.1"] if obx_data["OBX.9"] else 'No Probability'
         # obx_nature_of_abnormal_test = obx_data["OBX.10"]["OBX.10.1"] if obx_data["OBX.10"] else 'No Nature Of abnormal Test'
         # obx_observation_result_status = obx_data["OBX.11"]["OBX.11.1"] if obx_data["OBX.11"] else 'No Result Status'
+        # create_template(obx_observation_id)
         obj = {
             'obx_observation_set_id':obx_observation_set_id,
             'obx_observation_value_type':obx_observation_value_type,
@@ -62,16 +66,42 @@ def process_urised_hl7(HL7Message):
     results =  {'parsed_obx':parsed_obx,'specimen_number':specimen_number,'specimen_type':specimen_type, 'patient_info':patient_info}
     frappe.db.set_value('HL7 Message Logs', message_log.get('name'),{'result_data': json.dumps(results)})
     frappe.db.set_value('HL7 Message Logs',message_log.get('name'),{'order_number': specimen_number})
-    # lab_name = create_random_test()
-    # tests_sharing_sample_child =  frappe.db.get_all('Lab Test Sample Share',filters={'lab_test':['IN',lab_name]},fields=['name','lab_test','parent'])
-    # tests_sharing_sample_parent =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':lab_name},fields=['name','lab_test','parent'])
-    # tests_sharing_sample = tests_sharing_sample_parent or tests_sharing_sample_child
-    # if len(tests_sharing_sample)>0:
-    #     parent_test = tests_sharing_sample[0]['parent']
-    #     tests_sharing_sample =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':parent_test},fields=['name','lab_test'])
-    #     for test in tests_sharing_sample:
-    #         update_lab_test(test['lab_test'],custom_result,parsed_obx,message_log.get('name'))
-    #     update_lab_test(lab_name,custom_result,parsed_obx,message_log.get('name'))
-    # else:
-    #     update_lab_test(lab_name,custom_result,parsed_obx,message_log.get('name'))
+    lab_name = create_random_test()
+    tests_sharing_sample_child =  frappe.db.get_all('Lab Test Sample Share',filters={'lab_test':['IN',lab_name]},fields=['name','lab_test','parent'])
+    tests_sharing_sample_parent =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':lab_name},fields=['name','lab_test','parent'])
+    tests_sharing_sample = tests_sharing_sample_parent or tests_sharing_sample_child
+    if len(tests_sharing_sample)>0:
+        parent_test = tests_sharing_sample[0]['parent']
+        tests_sharing_sample =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':parent_test},fields=['name','lab_test'])
+        for test in tests_sharing_sample:
+            update_lab_test(test['lab_test'],custom_result,parsed_obx,message_log.get('name'))
+        update_lab_test(lab_name,custom_result,parsed_obx,message_log.get('name'))
+    else:
+        update_lab_test(lab_name,custom_result,parsed_obx,message_log.get('name'))
     return results
+
+def update_lab_test(test_name,custom_result,result_list,log_name):
+    frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
+    lab_test = frappe.get_doc('Lab Test',test_name)
+    normal_test_results =  frappe.db.get_all('Normal Test Result',filters={'parent':test_name},fields=['name','lab_test_name'])
+    lab_test.normal_toggle = 1
+    for res in normal_test_results:
+        frappe.delete_doc('Normal Test Result',res['name'])
+    idx = 0
+    sorted_results = result_list #sorted(result_list, key=lambda d: d['obx_observation_id'])
+    for result in sorted_results:
+        template_name = get_loinc_description(result['obx_observation_id'])
+        save_test_uom(uom_value=result['obx_observation_units'],description=template_name)
+        update_template_uom(template_name=template_name,uom_value=result['obx_observation_units'])
+        normal_test_items = lab_test.append('normal_test_items')
+        normal_test_items.idx = idx
+        normal_test_items.lab_test_name = template_name #get_template_name(result['obx_observation_id'])
+        normal_test_items.lab_test_event = result['obx_observation_id']
+        normal_test_items.result_value = str(result['obx_observation_value'])
+        normal_test_items.lab_test_uom = result['obx_observation_units']  #get_lab_uom(test_name)
+        # normal_test_items.secondary_uom = result['']
+        normal_test_items.normal_range = result['obx_observation_ref_range']
+        # normal_test_items.lab_test_comment = result['obx_observation_result_status']
+        lab_test.save(ignore_permissions=True)
+        idx+=1
+    add_comment(reference_name=test_name, reference_doctype="Lab Test",content="HL7 Log Document {0}".format(log_name))

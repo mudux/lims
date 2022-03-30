@@ -1,8 +1,10 @@
 
 import json
 import frappe
+from lims.api.shoe4africa_lab.cobas_400 import get_lab_uom
 from lims.api.utils.lab_test import create_random_test
 from lims.api.utils.log_comments import add_comment
+from lims.api.utils.template_update import save_test_uom, update_template_uom
 
 @frappe.whitelist(allow_guest=True)
 def process_yumizen_hl7(HL7Message):
@@ -84,17 +86,22 @@ def update_lab_test(test_name,custom_result,result_list,log_name):
     frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
     lab_test = frappe.get_doc('Lab Test',test_name)
     normal_test_results =  frappe.db.get_all('Normal Test Result',filters={'parent':test_name},fields=['name','lab_test_name'])
+    lab_test.normal_toggle = 1
     for res in normal_test_results:
         frappe.delete_doc('Normal Test Result',res['name'])
     idx = 0
     sorted_results = sorted(result_list, key=lambda d: d['obx_observation_id'])
     for result in sorted_results:
+        template_name = get_loinc_description(result['obx_observation_id']) #get_template_name(result['obx_observation_id'])
+        save_test_uom(uom_value=result['obx_observation_units'],description=template_name)
+        update_template_uom(template_name=template_name,uom_value=result['obx_observation_units'])
+        
         normal_test_items = lab_test.append('normal_test_items')
         normal_test_items.idx = idx
-        normal_test_items.lab_test_name = get_template_name(result['obx_observation_id'])
+        normal_test_items.lab_test_name = template_name
         normal_test_items.lab_test_event = result['obx_observation_id']
         normal_test_items.result_value = str(result['obx_observation_value'])
-        # normal_test_items.lab_test_uom = result['obx_observation_units']
+        normal_test_items.lab_test_uom = result['obx_observation_units'] #get_lab_uom(test_name)
         # normal_test_items.secondary_uom = result['']
         normal_test_items.normal_range = result['obx_observation_ref_range']
         # normal_test_items.lab_test_comment = result['obx_observation_result_status']
@@ -104,10 +111,14 @@ def update_lab_test(test_name,custom_result,result_list,log_name):
         item.idx = i
     add_comment(reference_name=test_name, reference_doctype="Lab Test",content="HL7 Log Document {0}".format(log_name))
 
-
+# descriptive_test_items
 def get_template_name(analysis_name):
     lab_test_code = frappe.db.get_all('Lab Test Codes',filters={'analysis':analysis_name},fields=['lab_test_template'])
     if len(lab_test_code)>0:
         return lab_test_code[0]['lab_test_template']
     else:
         return analysis_name
+
+def get_loinc_description(loinc_code):
+    description  = frappe.db.get_value('Loinc Code',{'name':loinc_code},'description')
+    return description if description else 'No loinc description'

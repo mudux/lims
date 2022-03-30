@@ -16,10 +16,10 @@ def create_random_test():
     lab_test.practitioner = 'HLC-PRAC-2021-00003'
     lab_test.practitioner_name = 'duncan Namakoto'
     lab_test.requesting_department = 'radiology'
-    shares = append_sample_share()
-    for x in shares:
-        shared_sample = lab_test.append('lab_test_sample_share')
-        shared_sample.lab_test = x['name']
+    # shares = append_sample_share()
+    # for x in shares:
+    #     shared_sample = lab_test.append('lab_test_sample_share')
+    #     shared_sample.lab_test = x['name']
     lab_test.save(ignore_permissions=True)
     lab_test.reload()
     return lab_test.get('name')

@@ -99,6 +99,7 @@ def update_lab_test(test_name,custom_result,result_list,log_name):
     frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
     lab_test = frappe.get_doc('Lab Test',test_name)
     normal_test_results =  frappe.db.get_all('Normal Test Result',filters={'parent':test_name},fields=['name','lab_test_name'])
+    lab_test.normal_toggle = 1
     for res in normal_test_results:
         frappe.delete_doc('Normal Test Result',res['name'])
     idx = 0
