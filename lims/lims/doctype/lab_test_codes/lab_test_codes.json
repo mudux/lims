@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2022-03-03 14:46:16.208532",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "lab_test_template",
+  "loinc_code",
+  "hl7_code",
+  "astm_code",
+  "analysis",
+  "test_group"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "LTC-.#####"
+  },
+  {
+   "fieldname": "lab_test_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Lab Test Template",
+   "options": "Lab Test Template"
+  },
+  {
+   "fieldname": "loinc_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Loinc Code"
+  },
+  {
+   "fieldname": "hl7_code",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "HL7 Code"
+  },
+  {
+   "fieldname": "astm_code",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "ASTM Code"
+  },
+  {
+   "fieldname": "analysis",
+   "fieldtype": "Link",
+   "label": "Analysis",
+   "options": "Lab Analysis"
+  },
+  {
+   "fieldname": "test_group",
+   "fieldtype": "Link",
+   "label": "Test Group",
+   "options": "Lab Test Group"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-03-23 16:41:36.310223",
+ "modified_by": "Administrator",
+ "module": "Lims",
+ "name": "Lab Test Codes",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Guest",
+   "select": 1,
+   "share": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Laboratory User",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Nursing User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Nurse Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

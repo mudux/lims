@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "autoname": "field:code",
+ "creation": "2022-03-24 12:47:37.975814",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "code",
+  "description",
+  "property",
+  "class",
+  "units_required",
+  "related_names",
+  "short_name",
+  "order_obs",
+  "uom"
+ ],
+ "fields": [
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Description"
+  },
+  {
+   "fieldname": "property",
+   "fieldtype": "Data",
+   "label": "Property"
+  },
+  {
+   "fieldname": "class",
+   "fieldtype": "Data",
+   "label": "Class"
+  },
+  {
+   "fieldname": "units_required",
+   "fieldtype": "Data",
+   "label": "Units Required"
+  },
+  {
+   "fieldname": "related_names",
+   "fieldtype": "Text",
+   "label": "Related Names"
+  },
+  {
+   "fieldname": "short_name",
+   "fieldtype": "Data",
+   "label": "Short Name"
+  },
+  {
+   "fieldname": "order_obs",
+   "fieldtype": "Data",
+   "label": "Order Obs"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "UOM"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-03-24 13:10:47.308989",
+ "modified_by": "Administrator",
+ "module": "Lims",
+ "name": "Loinc Code",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
