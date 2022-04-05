@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2022-04-04 12:33:41.196472",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "ordernumber",
+  "unprocessed_result",
+  "log_number"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "LIM-ERR-.YY.-.MM.-"
+  },
+  {
+   "fieldname": "ordernumber",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "OrderNumber",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unprocessed_result",
+   "fieldtype": "Long Text",
+   "in_list_view": 1,
+   "label": "Unprocessed Result",
+   "reqd": 1
+  },
+  {
+   "fieldname": "log_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Log Number",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-04-04 12:35:39.841653",
+ "modified_by": "Administrator",
+ "module": "Lims",
+ "name": "Lims Error Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

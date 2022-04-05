@@ -82,8 +82,8 @@ def process_astm_result(log_name):
     # logs = frappe.db.get_all('ASTM Message Logs',filters={},fields=['*'])
     sql = "select name from `tabLab Test` ORDER BY RAND () LIMIT 1;"
     test = frappe.db.sql(sql,as_dict=1)
-    # lab_name = test[0]['name'] #create_random_test() #'HLC-LAB-2022-00024'
-    lab_name = create_random_test() #'HLC-LAB-2022-00024'
+    lab_name = test[0]['name'] #create_random_test() #'HLC-LAB-2022-00024'
+    # lab_name = create_random_test() #'HLC-LAB-2022-00024'
     # test_sharing_sample_with = frappe.db.get_value('Lab Test',{'name':lab_name},'share_sample_with')
     astm_data = frappe.db.get_value('ASTM Message Logs',{'name':log_name},'astm')
     orderResult = json.loads(astm_data)
@@ -96,9 +96,10 @@ def process_astm_result(log_name):
         Ranges = orderResult['orderResult']['Ranges']
         # output = "{0} processed {1} res {2}".format(orderNumber,log_name,Result)
         # print(output)
-        results = append_order_to_test_and_results(Orders,Result,Uom,Ranges)
+        results = append_order_to_test_and_results(Orders,Result,Uom,Ranges,log_name,lab_name)
+        sorted_results = results
         # print("result {0} {1}".format(orderNumber,str(results)))
-        sorted_results = sorted(results, key=lambda d: d['template_name']) 
+        # sorted_results = sorted(results, key=lambda d: d['template_name']) 
         frappe.db.set_value('ASTM Message Logs', log_name,{'result_data': json.dumps(sorted_results)})
         tests_sharing_sample_child =  frappe.db.get_all('Lab Test Sample Share',filters={'lab_test':['IN',lab_name]},fields=['name','lab_test','parent'])
         tests_sharing_sample_parent =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':lab_name},fields=['name','lab_test','parent'])
@@ -120,7 +121,7 @@ def process_astm_result(log_name):
 
 
 
-def append_order_to_test_and_results(orderlist,resultList,Uom,Ranges):
+def append_order_to_test_and_results(orderlist,resultList,Uom,Ranges,log_name,lab_name):
     if len(orderlist) == len(resultList):
         order_names = []
         for index in range(0,len(orderlist)):
@@ -137,38 +138,48 @@ def append_order_to_test_and_results(orderlist,resultList,Uom,Ranges):
             # print('order_names {0}'.format(order_names))
         return order_names
     else:
-        return "Order/results mismatch"
+        log  = frappe.new_doc('Lims Error Log')
+        log.ordernumber  = lab_name
+        log.log_number = log_name
+        log.unprocessed_result = str({'orderlist':orderlist,'resultList':resultList,'Uom':Uom,
+        'Ranges':Ranges,'log_name':log_name,'lab_name':lab_name})
+        log.save(ignore_permissions=True)
+        return []#"Order/results mismatch"
 
 def set_lab_test_result(log_name,test_name,result_list=[]):
-    custom_result = "<ol>"
-    list_body='<li data-list="ordered"><span class="ql-ui" contenteditable="false"></span>'
-    lab_test = frappe.get_doc('Lab Test',test_name)
-    lab_test.normal_toggle = 1
-    normal_test_results =  frappe.db.get_all('Normal Test Result',filters={'parent':test_name},fields=['name','lab_test_name'])
-    for res in normal_test_results:
-        frappe.delete_doc('Normal Test Result',res['name'])
-    idx = 0
-    sorted_results = sorted(result_list, key=lambda d: d['template_name']) 
-    for result in sorted_results:
-        subString = "E+99"
-        result_value = result['results'][0:4] if subString in ['results'] else float(result['results'])
-        formatted_result ='{:.{}f}'.format(result_value,2)
-        save_test_uom(uom_value=result['uom'],description=result['template_name'])
-        update_template_uom(template_name=result['template_name'],uom_value=result['uom'])
-        normal_test_items = lab_test.append('normal_test_items')
-        normal_test_items.idx = idx
-        normal_test_items.lab_test_name = result['template_name']
-        normal_test_items.lab_test_event = result['analysis']
-        normal_test_items.result_value = "{0}".format(formatted_result) #,result['uom'])
-        normal_test_items.lab_test_uom =  result['uom'] #get_lab_uom(test_name)
-        normal_test_items.normal_range = result['range']
-        normal_test_items.lab_test_comment = 'NA'
-        lab_test.save(ignore_permissions=True)
-        custom_result += list_body + "{0}\t{1}\t{2} {3} {4}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'],result['range'])
-    idx+=1
-    frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
-    add_comment(reference_name=test_name, reference_doctype="Lab Test",content="ASTM Log Document {0}".format(log_name))
-    # pass
+    # print('result_list** {0}'.format(str(result_list)))
+    if len(result_list)>0:
+        custom_result = "<ol>"
+        list_body='<li data-list="ordered"><span class="ql-ui" contenteditable="false"></span>'
+        lab_test = frappe.get_doc('Lab Test',test_name)
+        lab_test.normal_toggle = 1
+        normal_test_results =  frappe.db.get_all('Normal Test Result',filters={'parent':test_name},fields=['name','lab_test_name'])
+        for res in normal_test_results:
+            frappe.delete_doc('Normal Test Result',res['name'])
+        idx = 0
+        sorted_results = result_list #sorted(result_list, key=lambda d: d['template_name']) 
+        for result in sorted_results:
+            subString = "E+99"
+            print(str(result))
+            print('======{0} {1}'.format(str(result),type(result)))
+            result_value = result['results'][0:4] if subString in result['results'] else float(result['results'])
+            formatted_result ='{:.{}f}'.format(float(result_value),2)
+            save_test_uom(uom_value=result['uom'],description=result['template_name'])
+            update_template_uom(template_name=result['template_name'],uom_value=result['uom'])
+            normal_test_items = lab_test.append('normal_test_items')
+            normal_test_items.idx = idx
+            normal_test_items.lab_test_name = result['template_name']
+            normal_test_items.lab_test_event = result['analysis']
+            normal_test_items.result_value = "{0}".format(formatted_result) #,result['uom'])
+            normal_test_items.lab_test_uom =  result['uom'] #get_lab_uom(test_name)
+            normal_test_items.normal_range = result['range']
+            normal_test_items.lab_test_comment = 'NA'
+            lab_test.save(ignore_permissions=True)
+            custom_result += list_body + "{0}\t{1}\t{2} {3} {4}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'],result['range'])
+        idx+=1
+        frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
+        add_comment(reference_name=test_name, reference_doctype="Lab Test",content="ASTM Log Document {0}".format(log_name))
+        # pass
 
 
 def process_astm_results():
