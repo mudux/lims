@@ -31,9 +31,6 @@ def get_template_name(lab_name):
     template_names = [x.template for x in templates]
     # lab_test_code = frappe.db.get_all('Lab Test Codes',filters={'astm_code': ['IN', astm_codes]},fields=['lab_test_template','analysis','astm_code'])
     lab_test_code = frappe.db.get_all('Lab Test Codes',filters={'lab_test_template': ['IN',template_names ]},fields=['lab_test_template','analysis','astm_code'])
-    # print(template_names)
-    # print(test_names)
-    # print(lab_test_code)
     return lab_test_code
 
 @frappe.whitelist(allow_guest=True)
@@ -44,10 +41,12 @@ def get_test_name(OrderNumber):
 @frappe.whitelist(allow_guest=True)
 def get_order_details(OrderNumber):
     # test = create_random_test() # will use order# to get lab test
-    sql = "select name from `tabLab Test` ORDER BY RAND () LIMIT 1;"
-    test = frappe.db.sql(sql,as_dict=1)
+    # sql = "select name from `tabLab Test` ORDER BY RAND () LIMIT 1;"
+    # test = frappe.db.sql(sql,as_dict=1)
     url = 'http://172.16.0.45:9002'
-    lab_test = frappe.get_doc('Lab Test',test[0]['name'])
+    # lab_test = frappe.get_doc('Lab Test',test[0]['name'])
+    lab_test = frappe.get_doc('Lab Test',OrderNumber)
+
     myobj = {
         'order_number': OrderNumber,
         'patient_name': lab_test.get('patient_name'),
