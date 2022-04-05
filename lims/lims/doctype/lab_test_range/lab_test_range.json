@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "creation": "2022-04-01 14:18:27.828879",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "lab_test_template",
+  "gender",
+  "start_age",
+  "end_age",
+  "lower_limit_value",
+  "upper_limit_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "lab_test_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Lab Test Template",
+   "options": "Lab Test Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Gender",
+   "options": "Gender",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_age",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Start Age",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_age",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "End Age",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lower_limit_value",
+   "fieldtype": "Data",
+   "label": "Lower Limit Value"
+  },
+  {
+   "fieldname": "upper_limit_value",
+   "fieldtype": "Data",
+   "label": "Upper Limit Value"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-04-01 14:18:27.828879",
+ "modified_by": "Administrator",
+ "module": "Lims",
+ "name": "Lab Test Range",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

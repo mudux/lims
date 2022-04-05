@@ -4,6 +4,7 @@ from lims.api.utils.log_comments import add_comment
 
 @frappe.whitelist(allow_guest=True)
 def process_sysmex_hl7(HL7Message):
+    #  # https://www.spheregen.com/custom-web-service-connections-from-mirth-connect/
     message_log = frappe.new_doc('HL7 Message Logs')
     message_log.lab_station = 'SHOE 4 AFRICA'
     message_log.lab_machine = 'SYSMEX XN330'
