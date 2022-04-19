@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2022-04-07 12:17:27.595531",
+ "creation": "2022-04-07 14:17:30.118391",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -44,7 +44,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-04-07 13:14:30.814649",
+ "modified": "2022-04-07 14:17:30.118391",
  "modified_by": "Administrator",
  "module": "Lims",
  "name": "Custom Lab Results",
