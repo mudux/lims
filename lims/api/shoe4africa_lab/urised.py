@@ -20,7 +20,7 @@ def process_urised_hl7(HL7Message):
     hl7_data = frappe.db.get_value('HL7 Message Logs',{'name':message_log.get('name')},'hl7')
     result_data = json.loads(hl7_data)
     # print(str(result_data))
-    pid_data = result_data["PID"]
+    pid_data = result_data["PID"] if result_data["PID"] else {}
     patient_name = pid_data["PID.5"]["PID.5.1"] if pid_data["PID.3"] else 'No Patient Number'
     patient_dob = pid_data["PID.3"]["PID.3.1"] if pid_data["PID.3"] else 'No Patient DOB'
     patient_info={'patient_name':patient_name,'patient_dob':patient_dob}
@@ -78,7 +78,7 @@ def process_urised_hl7(HL7Message):
         update_lab_test(lab_name,custom_result,parsed_obx,message_log.get('name'))
     else:
         update_lab_test(lab_name,custom_result,parsed_obx,message_log.get('name'))
-    return results
+    return message_log.get('name')
 
 def update_lab_test(test_name,custom_result,result_list,log_name):
     frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
