@@ -74,16 +74,18 @@ def save_cobas_results(orderResult,OrderCount,ResultCount):
         message_log.save(ignore_permissions=True)
         message_log.reload()
         process_astm_result(message_log.get('name'))
-        return {'message':'Results Posted Succesfully','payload':{'orderResult':orderResult,'ResultCount':ResultCount,'OrderCount':OrderCount,'processed':message_log.get('result_data')}}
+        # return {'message':'Results Posted Succesfully','payload':{'orderResult':orderResult,'ResultCount':ResultCount,'OrderCount':OrderCount,'processed':message_log.get('result_data')}}
+        print('process_astm_result')
+        return message_log.get('name')
     else:
         return {'message':'Results Missing Data'}
 
 def process_astm_result(log_name):
-    print('process cobas result log {0}'.format(log_name))
+    # print('process cobas result log {0}'.format(log_name))
     # logs = frappe.db.get_all('ASTM Message Logs',filters={},fields=['*'])
     sql = "select name from `tabLab Test` ORDER BY RAND () LIMIT 1;"
     test = frappe.db.sql(sql,as_dict=1)
-    lab_name = '5B' #test[0]['name'] #create_random_test() #'HLC-LAB-2022-00024'
+    lab_name = create_random_test() #'HLC-LAB-2022-00024'
     # lab_name = create_random_test() #'HLC-LAB-2022-00024'
     # test_sharing_sample_with = frappe.db.get_value('Lab Test',{'name':lab_name},'share_sample_with')
     astm_data = frappe.db.get_value('ASTM Message Logs',{'name':log_name},'astm')
@@ -161,8 +163,8 @@ def set_lab_test_result(log_name,test_name,result_list=[]):
         sorted_results = result_list #sorted(result_list, key=lambda d: d['template_name']) 
         for result in sorted_results:
             subString = "E+99"
-            print(str(result))
-            print('======{0} {1}'.format(str(result),type(result)))
+            # print(str(result))
+            # print('======{0} {1}'.format(str(result),type(result)))
             result_value = result['results'][0:4] if subString in result['results'] else float(result['results'])
             formatted_result ='{:.{}f}'.format(float(result_value),2)
             save_test_uom(uom_value=result['uom'],description=result['template_name'])
@@ -228,7 +230,7 @@ def import_loinc():
         doc = frappe.get_doc(args).insert()
         count+=1
         print("code {0} cnt {1}".format(code['Code'],count))
-    print('complete')
+    # print('complete')
 
 # lab types posting to patient chart
 # 
