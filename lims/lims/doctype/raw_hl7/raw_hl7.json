@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2022-04-22 10:37:04.381688",
+ "creation": "2022-04-27 12:34:34.650940",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -58,7 +58,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-25 12:43:58.522328",
+ "modified": "2022-04-27 12:34:34.650940",
  "modified_by": "Administrator",
  "module": "Lims",
  "name": "Raw HL7",

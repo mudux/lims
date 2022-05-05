@@ -66,7 +66,8 @@ def process_urised_hl7(HL7Message):
     results =  {'parsed_obx':parsed_obx,'specimen_number':specimen_number,'specimen_type':specimen_type, 'patient_info':patient_info}
     frappe.db.set_value('HL7 Message Logs', message_log.get('name'),{'result_data': json.dumps(results)})
     frappe.db.set_value('HL7 Message Logs',message_log.get('name'),{'order_number': specimen_number})
-    lab_name = create_random_test()
+    message_log.reload()
+    lab_name = 'NW' #specimen_number #message_log.get('order_number') #'NW' #create_random_test()
     tests_sharing_sample_child =  frappe.db.get_all('Lab Test Sample Share',filters={'lab_test':['IN',lab_name]},fields=['name','lab_test','parent'])
     tests_sharing_sample_parent =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':lab_name},fields=['name','lab_test','parent'])
     tests_sharing_sample = tests_sharing_sample_parent or tests_sharing_sample_child

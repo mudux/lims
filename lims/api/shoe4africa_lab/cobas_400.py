@@ -85,7 +85,8 @@ def process_astm_result(log_name):
     # logs = frappe.db.get_all('ASTM Message Logs',filters={},fields=['*'])
     sql = "select name from `tabLab Test` ORDER BY RAND () LIMIT 1;"
     test = frappe.db.sql(sql,as_dict=1)
-    lab_name = create_random_test() #'HLC-LAB-2022-00024'
+    # astm_data = frappe.db.get_value('ASTM Message Logs',{'name':log_name},'astm')
+    lab_name = 'LQ' #create_random_test() #'HLC-LAB-2022-00024'
     # lab_name = create_random_test() #'HLC-LAB-2022-00024'
     # test_sharing_sample_with = frappe.db.get_value('Lab Test',{'name':lab_name},'share_sample_with')
     astm_data = frappe.db.get_value('ASTM Message Logs',{'name':log_name},'astm')

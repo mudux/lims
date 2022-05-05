@@ -32,9 +32,9 @@ def process_raw_astm():
                 # print(result_data['orderResult'])
                 if data['lab_machine']=='COBAS400-S4A':
                     log_name = save_cobas_results(orderResult = result_data['orderResult'],OrderCount=result_data['OrderCount'],ResultCount=result_data['ResultCount'])
-                    print('finish save_cobas_results')
-                    frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': raw_name,'is_processed':1})
-                    print(log_name)
+                    # print('finish save_cobas_results')
+                    frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': log_name,'is_processed':1})
+                    # print(log_name)
             else:
                 print('ERROR')
                 log  = frappe.new_doc('Lims Error Log')
