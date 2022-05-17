@@ -67,7 +67,7 @@ def process_urised_hl7(HL7Message):
     frappe.db.set_value('HL7 Message Logs', message_log.get('name'),{'result_data': json.dumps(results)})
     frappe.db.set_value('HL7 Message Logs',message_log.get('name'),{'order_number': specimen_number})
     message_log.reload()
-    lab_name = 'NW' #specimen_number #message_log.get('order_number') #'NW' #create_random_test()
+    lab_name = specimen_number # 'NW' #specimen_number #message_log.get('order_number') #'NW' #create_random_test()
     tests_sharing_sample_child =  frappe.db.get_all('Lab Test Sample Share',filters={'lab_test':['IN',lab_name]},fields=['name','lab_test','parent'])
     tests_sharing_sample_parent =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':lab_name},fields=['name','lab_test','parent'])
     tests_sharing_sample = tests_sharing_sample_parent or tests_sharing_sample_child
@@ -102,6 +102,7 @@ def update_lab_test(test_name,custom_result,result_list,log_name):
         normal_test_items.lab_test_uom = result['obx_observation_units']  #get_lab_uom(test_name)
         # normal_test_items.secondary_uom = result['']
         normal_test_items.normal_range = result['obx_observation_ref_range']
+        normal_test_items.test_range = result['obx_observation_ref_range']
         # normal_test_items.lab_test_comment = result['obx_observation_result_status']
         lab_test.save(ignore_permissions=True)
         idx+=1

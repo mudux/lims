@@ -10,13 +10,13 @@ def purge_lims_logs():
 
 
 def purge_astm_logs():
-    sql = "SELECT name FROM `tabASTM Message Logs` where DATEDIFF(CURDATE(), DATE(creation)) > 10;"
+    sql = "SELECT name FROM `tabASTM Message Logs` where DATEDIFF(CURDATE(), DATE(creation)) > 15;"
     log_data = frappe.db.sql(sql,as_dict=1)
     for d in log_data:
         frappe.delete_doc('ASTM Message Logs',d['name'])
      
 def purge_hl7_logs():
-    sql = "SELECT name FROM `tabHL7 Message Logs` where DATEDIFF(CURDATE(), DATE(creation)) > 10;"
+    sql = "SELECT name FROM `tabHL7 Message Logs` where DATEDIFF(CURDATE(), DATE(creation)) > 15;"
     log_data = frappe.db.sql(sql,as_dict=1)
     for d in log_data:
         frappe.delete_doc('HL7 Message Logs',d['name'])
