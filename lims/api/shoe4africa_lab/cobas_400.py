@@ -4,6 +4,7 @@ from unittest import result
 from lims.api.utils.lab_test import create_random_test
 from lims.api.utils.log_comments import add_comment
 from lims.api.utils.template_update import save_test_uom, update_template_uom
+from lims.api.utils.utils import get_range_data
 import requests
 import frappe
 import json
@@ -65,17 +66,16 @@ def get_order_details(OrderNumber):
 
 @frappe.whitelist(allow_guest=True)
 def save_cobas_results(orderResult,OrderCount,ResultCount):
-    if orderResult['OrderNumber']:
+    if orderResult['OrderNumber'] and frappe.db.exists('Lab Test',{'name':orderResult['OrderNumber']}):
         message_log = frappe.new_doc('ASTM Message Logs')
         message_log.lab_station = 'SHOE 4 AFRICA'
         message_log.lab_machine = 'COBAS INTEGRA 400'
-        message_log.order_number = orderResult['OrderNumber'] or 'HLC-LAB-2022-00024'
+        message_log.order_number = orderResult['OrderNumber']
         message_log.astm = json.dumps({'orderResult':orderResult})
         message_log.save(ignore_permissions=True)
         message_log.reload()
         process_astm_result(message_log.get('name'))
         # return {'message':'Results Posted Succesfully','payload':{'orderResult':orderResult,'ResultCount':ResultCount,'OrderCount':OrderCount,'processed':message_log.get('result_data')}}
-        print('process_astm_result')
         return message_log.get('name')
     else:
         return {'message':'Results Missing Data'}
@@ -83,17 +83,19 @@ def save_cobas_results(orderResult,OrderCount,ResultCount):
 def process_astm_result(log_name):
     # print('process cobas result log {0}'.format(log_name))
     # logs = frappe.db.get_all('ASTM Message Logs',filters={},fields=['*'])
-    sql = "select name from `tabLab Test` ORDER BY RAND () LIMIT 1;"
-    test = frappe.db.sql(sql,as_dict=1)
+    # sql = "select name from `tabLab Test` ORDER BY RAND () LIMIT 1;"
+    # test = frappe.db.sql(sql,as_dict=1)
     # astm_data = frappe.db.get_value('ASTM Message Logs',{'name':log_name},'astm')
-    lab_name = 'LQ' #create_random_test() #'HLC-LAB-2022-00024'
+    # lab_name = 'LQ' #create_random_test() #'HLC-LAB-2022-00024'
     # lab_name = create_random_test() #'HLC-LAB-2022-00024'
+    lab_name = ''
     # test_sharing_sample_with = frappe.db.get_value('Lab Test',{'name':lab_name},'share_sample_with')
     astm_data = frappe.db.get_value('ASTM Message Logs',{'name':log_name},'astm')
     orderResult = json.loads(astm_data)
     if orderResult and 'orderResult' in orderResult:
         orderNumber = orderResult['orderResult']['OrderNumber']
-        OrderDate = orderResult['orderResult']['OrderDate'] if 'OrderDate' in orderResult else '00/00/0000'
+        lab_name = orderNumber
+        # OrderDate = orderResult['orderResult']['OrderDate'] if 'OrderDate' in orderResult else '00/00/0000'
         Orders = orderResult['orderResult']['Orders']
         Result = orderResult['orderResult']['Result']
         Uom = orderResult['orderResult']['Uom']
@@ -122,6 +124,12 @@ def process_astm_result(log_name):
         # if test_sharing_sample_with:
         # # get test template to filter results
         #     set_lab_test_result(log_name=log_name, test_name=test_sharing_sample_with,result_list=sorted_results)
+    else:
+        log  = frappe.new_doc('Lims Error Log')
+        log.ordernumber  = lab_name
+        log.log_number = log_name
+        log.unprocessed_result = str()
+        log.save(ignore_permissions=True)
 
 
 
@@ -137,7 +145,7 @@ def append_order_to_test_and_results(orderlist,resultList,Uom,Ranges,log_name,la
                     'template_name':lab_test_code[0]['lab_test_template'],
                     'analysis':lab_test_code[0]['analysis'],
                     'results':resultList[index],
-                    'range':Ranges[index],
+                    # 'range':Ranges[index],
                     'uom':Uom[index]})
             # print('order_names {0}'.format(order_names))
         return order_names
@@ -170,18 +178,23 @@ def set_lab_test_result(log_name,test_name,result_list=[]):
             formatted_result ='{:.{}f}'.format(float(result_value),2)
             save_test_uom(uom_value=result['uom'],description=result['template_name'])
             update_template_uom(template_name=result['template_name'],uom_value=result['uom'])
+            range_data = get_range_data(template_name=result['template_name'],gender=lab_test.get('patient_sex'),age=0)
+            range_str = "{0} - {1}".format(range_data['lower_limit_value'],range_data['upper_limit_value'])
             normal_test_items = lab_test.append('normal_test_items')
             normal_test_items.idx = idx
             normal_test_items.lab_test_name = result['template_name']
             normal_test_items.lab_test_event = result['analysis']
             normal_test_items.result_value = "{0}".format(formatted_result) #,result['uom'])
             normal_test_items.lab_test_uom =  result['uom'] #get_lab_uom(test_name)
-            normal_test_items.normal_range = result['range']
+            normal_test_items.normal_range =  range_str #result['range']
+            normal_test_items.test_range =  range_str
             normal_test_items.lab_test_comment = 'NA'
             lab_test.save(ignore_permissions=True)
-            custom_result += list_body + "{0}\t{1}\t{2} {3} {4}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'],result['range'])
+            custom_result += list_body + "{0}\t{1}\t{2} {3} {4}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'],range_str)
         idx+=1
         frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
+        from frappe.model.workflow import apply_workflow
+        apply_workflow(doc=lab_test, action="Forward For Verification")
         add_comment(reference_name=test_name, reference_doctype="Lab Test",content="ASTM Log Document {0}".format(log_name))
         # pass
 

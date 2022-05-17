@@ -1,8 +1,10 @@
 # Copyright (c) 2022, erp@mtrh.go.ke and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
 from frappe.model.document import Document
 
 class RawHL7(Document):
-	pass
+	@frappe.whitelist()
+	def reprocess_hl7_data(self):
+		pass
