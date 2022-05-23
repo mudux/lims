@@ -7,6 +7,7 @@ frappe.ui.form.on('Raw HL7', {
             frm.call('reprocess_hl7_data')
 			.then(r => {
 				// if (r.message) {}
+				frm.reload_doc();
 				frappe.show_alert({
 					message:'Success',
 					indicator:'green'

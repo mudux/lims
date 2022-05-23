@@ -21,8 +21,8 @@ def create_template_from_loinc(loinc_code):
         test_template.lab_test_code = description
         test_template.lab_test_group = 'Services'
         test_template.department = 'Eye clinic'
-        test_template.lab_test_rate = 250
-        test_template.is_billable = 1
+        test_template.lab_test_rate = 0
+        test_template.is_billable = 0
         test_template.disabled = 0
         test_template.lab_test_template_type = 'Single'
         create_item_from_template(test_template)
@@ -42,7 +42,7 @@ def create_item_from_template(doc):
 		'item_name':doc.lab_test_name,
 		'item_group': doc.lab_test_group,
 		'description':doc.lab_test_description,
-		'is_sales_item': 1,
+		'is_sales_item': 0,
 		'is_service_item': 1,
 		'is_purchase_item': 0,
 		'is_stock_item': 0,
