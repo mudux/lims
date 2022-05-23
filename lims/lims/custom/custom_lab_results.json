@@ -1,0 +1,32 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Custom Lab Results",
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2022-05-19 16:35:49.289995",
+   "default_value": null,
+   "doc_type": "Custom Lab Results",
+   "docstatus": 0,
+   "doctype_or_field": "DocField",
+   "field_name": "result",
+   "idx": 0,
+   "modified": "2022-05-19 16:35:49.289995",
+   "modified_by": "Administrator",
+   "name": "Custom Lab Results-result-options",
+   "owner": "Administrator",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "options",
+   "property_type": "Text",
+   "row_name": null,
+   "value": "\nREACTIVE\nNON-REACTIVE\nPOSITIVE\nNEGATIVE\nDETECTED\nNOT DETECTED\nCOLOR\nCONSISTENCY\nMICROSCOPY\nMPS SEEN\nNO MPS SEEN\nNOT APPLICABLE"
+  }
+ ],
+ "sync_on_migrate": 1
+}

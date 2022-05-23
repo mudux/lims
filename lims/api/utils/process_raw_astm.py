@@ -53,7 +53,7 @@ def process_raw_astm():
 
 def process_raw_astm_single(data):
     try:
-        raw_name = data['name'] #'a06e6641-c214'
+        raw_name = data.get('name') #'a06e6641-c214'
         raw_astm_doc  = frappe.get_doc('Raw ASTM', raw_name)
         astm_data = raw_astm_doc.get('astm_data')
         parsed_data = ''
@@ -80,6 +80,7 @@ def process_raw_astm_single(data):
             frappe.db.set_value('Raw ASTM', raw_name,{'is_processed':1,'has_error':1})
             pass
         print('end process_raw_astm')
+        return 1
     except:
         # log  = frappe.new_doc('Lims Error Log')
         # log.ordernumber  = raw_name

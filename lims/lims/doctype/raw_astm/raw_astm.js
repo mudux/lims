@@ -7,6 +7,8 @@ frappe.ui.form.on('Raw ASTM', {
             frm.call('reprocess_astm_data')
 			.then(r => {
 				// if (r.message) {}
+				frm.reload_doc();
+				frm.reload_doc();
 				frappe.show_alert({
 					message:'Success',
 					indicator:'green'
