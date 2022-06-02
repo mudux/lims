@@ -82,7 +82,7 @@ def age_test():
 @frappe.whitelist()
 def append_same_category_tests(name):
     from mtrh_dev.mtrh_dev.utilities import get_link_to_form_new_tab
-    from clinical.hook.lab_test import get_sample_shares
+    # from clinical.hook.lab_test import get_sample_shares
     # name='3BQ'
     lab_doc = frappe.get_doc('Lab Test',name)
     sql="""select tlt.name,tlt.template,tlt.workflow_state,ltc.test_group,ltc.lab_test_template,tlt.patient from `tabLab Test` tlt RIGHT join `tabLab Test Codes` ltc on tlt.template=ltc.lab_test_template where  tlt.patient='{0}' and tlt.docstatus=0""".format(lab_doc.patient)

@@ -195,7 +195,8 @@ def set_lab_test_result(log_name,test_name,result_list=[]):
         idx+=1
         frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
         from frappe.model.workflow import apply_workflow
-        apply_workflow(doc=lab_test, action="Forward For Verification")
+        if lab_test.get('workflow_state')=='Processing':
+            apply_workflow(doc=lab_test, action="Forward For Verification")
         if lab_test.get('employee'):
             msg = 'Test #{0} processed at {1} posted through LIMS, awaiting verification.Thank you'.format(lab_test.get('name'),lab_test.get('processing_lab'))
             # notify_lab_employee_sms(lab_test.get('employee'),message=msg)
