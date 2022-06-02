@@ -6,10 +6,10 @@ from lims.api.shoe4africa_lab.cobas_400 import process_astm_result, save_cobas_r
 
 # bench execute lims.api.utils.process_raw_astm.process_raw_astm
 def process_raw_astm():
-    print('start process_raw_astm')
+    # print('start process_raw_astm')
     field_list = ['lab_station','lab_machine','astm_data','name']
     raw_astm  = frappe.get_all('Raw ASTM', filters={'is_processed': 0,'has_error':0}, fields= field_list,order_by='creation asc',start=0,page_length=20,)
-    print("data {0}".format(len(raw_astm)))
+    # print("data {0}".format(len(raw_astm)))
     for data in raw_astm:
         try:
             raw_name = data['name'] #'a06e6641-c214'
@@ -63,11 +63,11 @@ def process_raw_astm_single(data):
             parsed_data = raw_astm_doc.get('astm_data')
         if len(parsed_data)>100:
             result_data = json.loads(parsed_data)
-            if data['lab_machine']=='COBAS400-S4A':
+            if raw_astm_doc.get('lab_machine')=='COBAS400-S4A':
                 # print('cobas machine')
                 log_name = save_cobas_results(orderResult = result_data['orderResult'],OrderCount=result_data['OrderCount'],ResultCount=result_data['ResultCount'])
-                print('log name ',str(log_name))
-                print('raw name-2 ',raw_name)
+                # print('log name ',str(log_name))
+                # print('raw name-2 ',raw_name)
                 frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': str(log_name),'is_processed':1})
                 frappe.db.commit()
         else:
@@ -110,3 +110,12 @@ def astm_debug():
             # print('finish save_cobas_results')
             frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': log_name,'is_processed':1})
             print(log_name)
+            
+# SAL-ORD-2022-139992
+# SAL-ORD-2022-140949
+# SAL-ORD-2022-139993
+# SAL-ORD-2022-132412
+# SAL-ORD-2022-132411
+# SAL-ORD-2022-143331
+# SAL-ORD-2022-139983
+# SAL-ORD-2022-141675

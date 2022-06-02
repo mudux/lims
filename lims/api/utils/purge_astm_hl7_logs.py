@@ -1,12 +1,13 @@
 import frappe
 from datetime import datetime,date,timedelta
+from frappe.utils.background_jobs import enqueue
 
 # bench execute lims.api.utils.purge_astm_hl7_logs.purge_lims_logs
 def purge_lims_logs():
-    purge_astm_logs()
-    purge_hl7_logs()
-    clear_raw_astm_older_than()
-    clear_raw_hl7_older_than()
+    enqueue(method=purge_astm_logs, queue='long', timeout=3600)
+    enqueue(method=purge_hl7_logs, queue='long', timeout=3600)
+    enqueue(method=clear_raw_astm_older_than, queue='long', timeout=3600)
+    enqueue(method=clear_raw_hl7_older_than, queue='long', timeout=3600)
 
 
 def purge_astm_logs():
