@@ -7,7 +7,7 @@ from lims.api.utils.log_comments import add_comment
 from lims.api.utils.template_update import save_test_uom, update_template_uom
 
 @frappe.whitelist(allow_guest=True)
-def process_yumizen_hl7(HL7Message):
+def process_yumizen550_hl7(HL7Message):
     message_log = frappe.new_doc('HL7 Message Logs')
     message_log.lab_station = 'SHOE 4 AFRICA'
     message_log.lab_machine = 'HORIBA YUMIZEN 550'
@@ -66,7 +66,7 @@ def process_yumizen_hl7(HL7Message):
 
         results =  {'parsed_obx':parsed_obx,'specimen_number':specimen_number,'specimen_type':specimen_type, 'patient_info':patient_info}
         frappe.db.set_value('HL7 Message Logs', message_log.get('name'),{'result_data': json.dumps(results)})
-        lab_name = create_random_test()
+        lab_name = specimen_number #create_random_test()
         tests_sharing_sample_child =  frappe.db.get_all('Lab Test Sample Share',filters={'lab_test':['IN',lab_name]},fields=['name','lab_test','parent'])
         tests_sharing_sample_parent =  frappe.db.get_all('Lab Test Sample Share',filters={'parent':lab_name},fields=['name','lab_test','parent'])
         tests_sharing_sample = tests_sharing_sample_parent or tests_sharing_sample_child
@@ -78,7 +78,7 @@ def process_yumizen_hl7(HL7Message):
             update_lab_test(lab_name,custom_result,parsed_obx,message_log.get('name'))
         else:
             update_lab_test(lab_name,custom_result,parsed_obx,message_log.get('name'))
-            return results
+            return message_log.get('name') # results
     else:
         return {'Incoplete data'}
 
@@ -104,11 +104,15 @@ def update_lab_test(test_name,custom_result,result_list,log_name):
         normal_test_items.lab_test_uom = result['obx_observation_units'] #get_lab_uom(test_name)
         # normal_test_items.secondary_uom = result['']
         normal_test_items.normal_range = result['obx_observation_ref_range']
+        normal_test_items.test_range =  result['obx_observation_ref_range']
         # normal_test_items.lab_test_comment = result['obx_observation_result_status']
         lab_test.save(ignore_permissions=True)
         idx+=1
     for i, item in enumerate(sorted(lab_test.normal_test_items, key=lambda item: item.lab_test_name), start=1):
         item.idx = i
+    from frappe.model.workflow import apply_workflow
+    if lab_test.get('workflow_state')=='Processing':
+        apply_workflow(doc=lab_test, action="Forward For Verification")
     add_comment(reference_name=test_name, reference_doctype="Lab Test",content="HL7 Log Document {0}".format(log_name))
 
 # descriptive_test_items

@@ -1,6 +1,7 @@
 import json
 import frappe
 from lims.api.shoe4africa_lab.urised import process_urised_hl7
+from lims.api.shoe4africa_lab.yumizen_550 import process_yumizen550_hl7
 
 # bench execute lims.api.utils.process_raw_hl7.process_raw_hl7
 def process_raw_hl7():
@@ -28,6 +29,12 @@ def process_raw_hl7():
                 log_name = process_urised_hl7(result_data['HL7Message'])
                 frappe.db.set_value('Raw HL7', raw_name,{'hl7_log': log_name,'is_processed':1})
                 # print(log_name)
+                pass
+            # 
+            if data['lab_machine'] == 'YUMIZEN-550-S4A':
+                log_name = process_yumizen550_hl7(result_data['HL7Message'])
+                frappe.db.set_value('Raw HL7', raw_name,{'hl7_log': str(log_name),'is_processed':1})
+                print(log_name)
         else:
             print('ERROR')
             log  = frappe.new_doc('Lims Error Log')

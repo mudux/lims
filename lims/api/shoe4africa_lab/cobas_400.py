@@ -1,4 +1,3 @@
-
 from datetime import datetime, date
 from unittest import result
 from lims.api.utils.lab_test import create_random_test
@@ -193,7 +192,7 @@ def set_lab_test_result(log_name,test_name,result_list=[]):
             lab_test.save(ignore_permissions=True)
             custom_result += list_body + "{0}\t{1}\t{2} {3} {4}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'],range_str)
         idx+=1
-        frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
+        # frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
         from frappe.model.workflow import apply_workflow
         if lab_test.get('workflow_state')=='Processing':
             apply_workflow(doc=lab_test, action="Forward For Verification")
