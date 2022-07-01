@@ -3,8 +3,9 @@
 
 import frappe
 from frappe.model.document import Document
+from lims.api.utils.process_raw_hl7 import process_raw_hl7_single
 
 class RawHL7(Document):
 	@frappe.whitelist()
 	def reprocess_hl7_data(self):
-		pass
+		process_raw_hl7_single(self)

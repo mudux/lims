@@ -19,7 +19,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "LTC-.#####"
+   "options": "LTCC-.######"
   },
   {
    "fieldname": "lab_test_template",
@@ -63,7 +63,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-03-23 16:41:36.310223",
+ "modified": "2022-06-22 16:14:23.182444",
  "modified_by": "Administrator",
  "module": "Lims",
  "name": "Lab Test Codes",

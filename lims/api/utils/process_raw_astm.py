@@ -8,7 +8,7 @@ from lims.api.shoe4africa_lab.cobas_400 import process_astm_result, save_cobas_r
 def process_raw_astm():
     # print('start process_raw_astm')
     field_list = ['lab_station','lab_machine','astm_data','name']
-    raw_astm  = frappe.get_all('Raw ASTM', filters={'is_processed': 0,'has_error':0}, fields= field_list,order_by='creation asc',start=0,page_length=20,)
+    raw_astm  = frappe.get_all('Raw ASTM', filters={'is_processed': 0,'has_error':0}, fields= field_list,order_by='creation asc',start=0,page_length=10)
     # print("data {0}".format(len(raw_astm)))
     for data in raw_astm:
         try:
@@ -50,10 +50,13 @@ def process_raw_astm():
             # log.unprocessed_result = str(x)
             # log.save(ignore_permissions=True)
             pass
+        finally:
+            continue
 
-def process_raw_astm_single(data):
+# bench execute lims.api.utils.process_raw_astm.process_raw_astm_single
+def process_raw_astm_single(data=''):
     try:
-        raw_name = data.get('name') #'a06e6641-c214'
+        raw_name = data.get('name') #'7d9641ba-f78b' #
         raw_astm_doc  = frappe.get_doc('Raw ASTM', raw_name)
         astm_data = raw_astm_doc.get('astm_data')
         parsed_data = ''
