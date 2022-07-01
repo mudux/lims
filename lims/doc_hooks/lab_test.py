@@ -16,10 +16,11 @@ def lab_test_after_insert_hook(doc,state):
     dob = frappe.db.get_value('Patient',{ 'name':patient }, 'dob')
     gender = frappe.db.get_value('Patient',{ 'name':patient }, 'gender')
     sex = frappe.db.get_value('Patient',{ 'name':patient }, 'sex')
-    doc.patient_age = age_calc(dob)
+    doc.patient_age = age_calc(dob,doc.name)
     doc.patient_sex = gender or sex 
     doc.save(ignore_permissions=True)
     enqueue(method=append_same_category_tests,name=doc.get('name'), queue='short', timeout=600)
+    enqueue(method=tetst_age_fix, queue='short', timeout=600)
     # test_sharing_sample_with = doc.get('share_sample_with')
     # frappe.msgprint("sharing sample  " + test_sharing_sample_with)
     # if test_sharing_sample_with:
@@ -33,7 +34,7 @@ def lab_test_after_insert_hook(doc,state):
     #         lab_test.save(ignore_permissions=True)
     #     frappe.msgprint('updated related')
 
-def age_calc(dob):
+def age_calc(dob,lab_name=''):
     currentDate = date.today()#nowdate() #datetime.datetime.now()
     # dob = '2022-05-01'
     # deadline= dob #input ('Plz enter your date of birth (mm/dd/yyyy) ')
@@ -56,7 +57,10 @@ def age_calc(dob):
     hours = (days-daysInt)*24
     hoursInt=int(hours)
     if yearsInt>0:
-        # print("{0}Y".format(yearsInt))
+        # if yearsInt>100:
+        #     enqueue(method=log_error ,lab_name=lab_name,dob=dob, queue='short', timeout=600)
+        # # print("{0}Y".format(yearsInt))
+        # else:
         return "{0}Y".format(yearsInt)
     if monthsInt>0:
         # print("{0}M".format(monthsInt))
@@ -70,13 +74,15 @@ def age_calc(dob):
     
 # bench execute lims.doc_hooks.lab_test.age_test
 def age_test():
-    pats = frappe.get_all('Lab Test',filters={},fields=['name','patient'])
+    pats = frappe.get_all('Lab Test',fields=['name','patient'],filters={'patient':'1122083'})
     for p in pats:
         print(p['name'])
         dob = frappe.db.get_value('Patient',{ 'name': p['patient'] }, 'dob')
+        # print(type(dob))
         print(str(dob))
-        age = age_calc(dob)
-        frappe.db.set_value('Lab Test',p['name'],{'patient_age':age})
+        age = age_calc(dob,p['name'])
+        print('age ',age)
+        # frappe.db.set_value('Lab Test',p['name'],{'patient_age':age})
 
 # bench execute lims.doc_hooks.lab_test.append_same_category_tests
 @frappe.whitelist()
@@ -174,3 +180,53 @@ def bulk_workflow_update(docname,process_lab='',employee=''):
         apply_workflow(doc=doc, action="Forward For Verification")
     if workflow_state=='Awaiting Verification':
         apply_workflow(doc=doc, action="Post Lab Test")
+ 
+# bench execute lims.doc_hooks.lab_test.lab_clean
+        
+def lab_clean():
+    sql = "select name,idx from `tabNormal Test Result` where parent='B73'"
+    items=frappe.db.sql(sql,as_dict=1)
+    count = 0
+    for i in items:
+        count +=1
+        if count>1:
+            sq= "delete from `tabNormal Test Result` where name='{0}'".format(i.name)
+            frappe.db.sql(sq,as_dict=1)
+            print(count)
+
+# bench execute lims.doc_hooks.lab_test.comment_count            
+def comment_count(name='B73'):
+    sqlc="select count(name) as cnt,reference_name from tabComment where reference_doctype='Lab Test' group by reference_name"
+    parents=frappe.db.sql(sqlc,as_dict=1)
+    for p in parents:
+        print(p.reference_name, '  ',p.cnt)
+        sql = "select name,reference_doctype,reference_name from tabComment where reference_name='{0}'".format(p.reference_name)
+        items=frappe.db.sql(sql,as_dict=1)
+        count = 0
+        for i in items:
+            count +=1
+            if count>1:
+                sq= "delete from tabComment where name='{0}'".format(i.name)
+                frappe.db.sql(sq,as_dict=1)
+                print(count)
+
+ # bench execute lims.doc_hooks.lab_test.tetst_age_fix              
+def tetst_age_fix():
+    sql = "select name,patient,docstatus from `tabLab Test` where patient_age is null;"
+    labs = frappe.db.sql(sql,as_dict=1)
+    for lab in labs:
+        patient = lab.get('patient')
+        # print(' patient ', patient)
+        dob = frappe.db.get_value('Patient',{ 'name':patient }, 'dob')
+        patient_age = age_calc(dob,lab.get('name'))
+        # print(patient_age)
+        up_sq = "update `tabLab Test` set patient_age ='{0}' where name='{1}';".format(patient_age,lab.get('name'))
+        print(up_sq)
+        frappe.db.sql(up_sq,as_dict=1)
+        
+def log_error(lab_name,dob):
+    log  = frappe.new_doc('Lims Error Log')
+    log.ordernumber  = lab_name
+    log.log_number = ''
+    log.unprocessed_result = str(dob)
+    log.save(ignore_permissions=True)

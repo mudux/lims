@@ -9,11 +9,12 @@ def purge_lims_logs():
     enqueue(method=clear_raw_astm_older_than, queue='long', timeout=3600)
     enqueue(method=clear_raw_hl7_older_than, queue='long', timeout=3600)
 
-
+# bench execute lims.api.utils.purge_astm_hl7_logs.purge_astm_logs
 def purge_astm_logs():
     sql = "SELECT name FROM `tabASTM Message Logs` where DATEDIFF(CURDATE(), DATE(creation)) > 15;"
     log_data = frappe.db.sql(sql,as_dict=1)
     for d in log_data:
+        print(d['name'])
         frappe.delete_doc('ASTM Message Logs',d['name'])
      
 def purge_hl7_logs():

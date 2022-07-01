@@ -66,19 +66,23 @@ def get_order_details(OrderNumber):
 
 @frappe.whitelist(allow_guest=True)
 def save_cobas_results(orderResult,OrderCount,ResultCount):
-    if orderResult['OrderNumber'] and frappe.db.exists('Lab Test',{'name':orderResult['OrderNumber']}):
-        message_log = frappe.new_doc('ASTM Message Logs')
-        message_log.lab_station = 'SHOE 4 AFRICA'
-        message_log.lab_machine = 'COBAS INTEGRA 400'
-        message_log.order_number = orderResult['OrderNumber']
-        message_log.astm = json.dumps({'orderResult':orderResult})
-        message_log.save(ignore_permissions=True)
-        message_log.reload()
-        process_astm_result(message_log.get('name'))
-        # return {'message':'Results Posted Succesfully','payload':{'orderResult':orderResult,'ResultCount':ResultCount,'OrderCount':OrderCount,'processed':message_log.get('result_data')}}
-        return message_log.get('name')
+    if frappe.db.exists('ASTM Message Logs',{'order_number':orderResult['OrderNumber']}):
+        # print('already logged')
+        return frappe.db.get_value('ASTM Message Logs',{'order_number':orderResult['OrderNumber']},'name')
     else:
-        return {'message':'Results Missing Data'}
+        if orderResult['OrderNumber'] and frappe.db.exists('Lab Test',{'name':orderResult['OrderNumber']}):
+            message_log = frappe.new_doc('ASTM Message Logs')
+            message_log.lab_station = 'SHOE 4 AFRICA'
+            message_log.lab_machine = 'COBAS INTEGRA 400'
+            message_log.order_number = orderResult['OrderNumber']
+            message_log.astm = json.dumps({'orderResult':orderResult})
+            message_log.save(ignore_permissions=True)
+            message_log.reload()
+            process_astm_result(message_log.get('name'))
+            # return {'message':'Results Posted Succesfully','payload':{'orderResult':orderResult,'ResultCount':ResultCount,'OrderCount':OrderCount,'processed':message_log.get('result_data')}}
+            return message_log.get('name')
+        else:
+            return {'message':'Results Missing Data'}
 
 def process_astm_result(log_name):
     # print('process cobas result log {0}'.format(log_name))
@@ -128,7 +132,7 @@ def process_astm_result(log_name):
         log  = frappe.new_doc('Lims Error Log')
         log.ordernumber  = lab_name
         log.log_number = log_name
-        log.unprocessed_result = str()
+        log.unprocessed_result = 'error in process_astm_result'
         log.save(ignore_permissions=True)
 
 
@@ -165,9 +169,9 @@ def set_lab_test_result(log_name,test_name,result_list=[]):
         list_body='<li data-list="ordered"><span class="ql-ui" contenteditable="false"></span>'
         lab_test = frappe.get_doc('Lab Test',test_name)
         lab_test.normal_toggle = 1
-        normal_test_results =  frappe.db.get_all('Normal Test Result',filters={'parent':test_name},fields=['name','lab_test_name'])
-        for res in normal_test_results:
-            frappe.delete_doc('Normal Test Result',res['name'])
+        # normal_test_results =  frappe.db.get_all('Normal Test Result',filters={'parent':test_name},fields=['name','lab_test_name'])
+        # for res in normal_test_results:
+            # frappe.delete_doc('Normal Test Result',res['name'])
         idx = 0
         sorted_results = result_list #sorted(result_list, key=lambda d: d['template_name']) 
         for result in sorted_results:
@@ -180,25 +184,26 @@ def set_lab_test_result(log_name,test_name,result_list=[]):
             update_template_uom(template_name=result['template_name'],uom_value=result['uom'])
             range_data = get_range_data(template_name=result['template_name'],gender=lab_test.get('patient_sex'),age=0)
             range_str = "{0} - {1}".format(range_data['lower_limit_value'],range_data['upper_limit_value'])
-            normal_test_items = lab_test.append('normal_test_items')
-            normal_test_items.idx = idx
-            normal_test_items.lab_test_name = result['template_name']
-            normal_test_items.lab_test_event = result['analysis']
-            normal_test_items.result_value = "{0}".format(formatted_result) #,result['uom'])
-            normal_test_items.lab_test_uom =  result['uom'] #get_lab_uom(test_name)
-            normal_test_items.normal_range =  range_str #result['range']
-            normal_test_items.test_range =  range_str
-            normal_test_items.lab_test_comment = 'NA'
-            lab_test.save(ignore_permissions=True)
-            custom_result += list_body + "{0}\t{1}\t{2} {3} {4}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'],range_str)
-        idx+=1
+            if not frappe.db.exists('Normal Test Result',{'parent':test_name,'lab_test_name':result['template_name'],'lab_test_event':result['analysis']}):
+                normal_test_items = lab_test.append('normal_test_items')
+                normal_test_items.idx = idx
+                normal_test_items.lab_test_name = result['template_name']
+                normal_test_items.lab_test_event = result['analysis']
+                normal_test_items.result_value = "{0}".format(formatted_result) #,result['uom'])
+                normal_test_items.lab_test_uom =  result['uom'] #get_lab_uom(test_name)
+                normal_test_items.normal_range =  range_str #result['range']
+                normal_test_items.test_range =  range_str
+                normal_test_items.lab_test_comment = 'NA'
+                lab_test.save(ignore_permissions=True)
+                custom_result += list_body + "{0}\t{1}\t{2} {3} {4}</li>".format(result['template_name'], result['analysis'],formatted_result,result['uom'],range_str)
+                idx+=1
         # frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
         from frappe.model.workflow import apply_workflow
         if lab_test.get('workflow_state')=='Processing':
             apply_workflow(doc=lab_test, action="Forward For Verification")
         if lab_test.get('employee'):
-            msg = 'Test #{0} processed at {1} posted through LIMS, awaiting verification.Thank you'.format(lab_test.get('name'),lab_test.get('processing_lab'))
-            # notify_lab_employee_sms(lab_test.get('employee'),message=msg)
+            msg = 'Test #{0} processed at {1} Cobas Integra posted through LIMS, awaiting verification.Thank you'.format(lab_test.get('name'),lab_test.get('processing_lab'))
+            notify_lab_employee_sms(lab_test.get('employee'),message=msg)
         add_comment(reference_name=test_name, reference_doctype="Lab Test",content="ASTM Log Document {0}".format(log_name))
         # pass
 
@@ -247,7 +252,7 @@ def import_loinc():
         # print(args)
         doc = frappe.get_doc(args).insert()
         count+=1
-        print("code {0} cnt {1}".format(code['Code'],count))
+        # print("code {0} cnt {1}".format(code['Code'],count))
     # print('complete')
 
 # lab types posting to patient chart

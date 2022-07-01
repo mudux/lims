@@ -83,7 +83,7 @@ def process_yumizen550_hl7(HL7Message):
         return {'Incoplete data'}
 
 def update_lab_test(test_name,custom_result,result_list,log_name):
-    frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
+    # frappe.db.set_value('Lab Test',test_name,{'custom_result': custom_result})
     lab_test = frappe.get_doc('Lab Test',test_name)
     normal_test_results =  frappe.db.get_all('Normal Test Result',filters={'parent':test_name},fields=['name','lab_test_name'])
     lab_test.normal_toggle = 1
@@ -98,8 +98,8 @@ def update_lab_test(test_name,custom_result,result_list,log_name):
         
         normal_test_items = lab_test.append('normal_test_items')
         normal_test_items.idx = idx
-        normal_test_items.lab_test_name = template_name
-        normal_test_items.lab_test_event = result['obx_observation_id']
+        normal_test_items.lab_test_name = result['obx_observation_analysis']
+        normal_test_items.lab_test_event =  template_name #result['obx_observation_id']
         normal_test_items.result_value = str(result['obx_observation_value'])
         normal_test_items.lab_test_uom = result['obx_observation_units'] #get_lab_uom(test_name)
         # normal_test_items.secondary_uom = result['']

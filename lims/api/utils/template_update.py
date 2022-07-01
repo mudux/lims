@@ -12,17 +12,19 @@ def update_template_to_descriptive():
         # Descriptive Test Template
         template.save(ignore_permissions=True)
 
-def create_template_from_loinc(loinc_code):
+# bench execute lims.api.utils.template_update.create_template_from_loinc
+def create_template_from_loinc(loinc_code=''):
     description  = frappe.db.get_value('Loinc Code',{'name':loinc_code},'description')
+    # description='Extended UEC'
     if description and not frappe.db.exists('Item', description):
         test_template = frappe.new_doc('Lab Test Template')
         test_template.lab_test_name = description
         test_template.item = description 
         test_template.lab_test_code = description
-        test_template.lab_test_group = 'Services'
-        test_template.department = 'Eye clinic'
+        test_template.lab_test_group = 'Lab Services'
+        test_template.department = 'Nephrology'
         test_template.lab_test_rate = 0
-        test_template.is_billable = 0
+        test_template.is_billable = 1
         test_template.disabled = 0
         test_template.lab_test_template_type = 'Single'
         create_item_from_template(test_template)
@@ -52,7 +54,6 @@ def create_item_from_template(doc):
 		'disabled': 0 if doc.is_billable and not doc.disabled else doc.disabled,
 		'stock_uom': uom
 	}).insert(ignore_permissions=True, ignore_mandatory=True)
-
 	# Insert item price
 	if doc.is_billable and doc.lab_test_rate != 0.0:
 		price_list_name = frappe.db.get_value('Price List', {'selling': 1})
