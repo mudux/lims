@@ -1,3 +1,4 @@
+from warnings import filters
 from billing.billing.api.sales_invoice.create_sales_invoice import re_eveluate_sales_orders
 # from billing.billing.utils.payment_notifications import get_party_phone
 import frappe
@@ -230,3 +231,10 @@ def log_error(lab_name,dob):
     log.log_number = ''
     log.unprocessed_result = str(dob)
     log.save(ignore_permissions=True)
+    
+# bench execute lims.doc_hooks.lab_test.patient_record_exist 
+def patient_record_exist():
+    # labs = frappe.get_all("Lab Test",filters={'docstatus':1},fields=['name','patient'])
+    labs = frappe.db.count('Lab Test', {'docstatus': 1})
+    recs = frappe.db.count('Patient Medical Record', {'reference_doctype': 'Lab Test'})
+    print('labs ',labs, ' recs ',recs)
