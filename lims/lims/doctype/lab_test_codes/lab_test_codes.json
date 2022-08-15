@@ -63,7 +63,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-22 16:14:23.182444",
+ "modified": "2022-07-19 10:03:39.891263",
  "modified_by": "Administrator",
  "module": "Lims",
  "name": "Lab Test Codes",
@@ -88,7 +88,6 @@
    "read": 1,
    "report": 1,
    "role": "Guest",
-   "select": 1,
    "share": 1
   },
   {

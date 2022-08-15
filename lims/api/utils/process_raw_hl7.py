@@ -54,11 +54,13 @@ def process_raw_hl7():
     # process_raw_astm
     # lims.api.utils.process_raw_astm.process_raw_astm
 
+# bench execute lims.api.utils.process_raw_hl7.process_raw_hl7_single
 def process_raw_hl7_single(data):
     # raw_name =  data['name'] #'827ea493-c493'
     # print(raw_name)
+    # raw_name='7416b027-068a'
     raw_name = data.get('name')
-    raw_astm_doc  = data #frappe.get_doc('Raw HL7', raw_name)
+    raw_astm_doc = frappe.get_doc('Raw HL7', raw_name)# = data #
     hl7_data = raw_astm_doc.get('hl7_data')
     parsed_data = ''
     if hl7_data.startswith('"') and hl7_data.endswith('"'):
