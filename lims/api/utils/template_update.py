@@ -14,8 +14,8 @@ def update_template_to_descriptive():
 
 # bench execute lims.api.utils.template_update.create_template_from_loinc
 def create_template_from_loinc(loinc_code=''):
-    description  = frappe.db.get_value('Loinc Code',{'name':loinc_code},'description')
-    # description='Extended UEC'
+    # description  = frappe.db.get_value('Loinc Code',{'name':loinc_code},'description')
+    description='Pro-Bnp'
     if description and not frappe.db.exists('Item', description):
         test_template = frappe.new_doc('Lab Test Template')
         test_template.lab_test_name = description
@@ -23,16 +23,16 @@ def create_template_from_loinc(loinc_code=''):
         test_template.lab_test_code = description
         test_template.lab_test_group = 'Lab Services'
         test_template.department = 'Nephrology'
-        test_template.lab_test_rate = 0
+        test_template.lab_test_rate = 2000
         test_template.is_billable = 1
         test_template.disabled = 0
         test_template.lab_test_template_type = 'Single'
         create_item_from_template(test_template)
         test_template.save(ignore_permissions=True)
-        test_code = frappe.new_doc('Lab Test Codes')
-        test_code.lab_test_template = description
-        test_code.loinc_code = loinc_code
-        test_code.save(ignore_permissions=True)
+        # test_code = frappe.new_doc('Lab Test Codes')
+        # test_code.lab_test_template = description
+        # test_code.loinc_code = loinc_code
+        # test_code.save(ignore_permissions=True)
 
 
 def create_item_from_template(doc):

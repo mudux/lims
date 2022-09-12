@@ -114,10 +114,10 @@ def update_lab_test(test_name,custom_result,result_list,log_name):
                 normal_test_items.test_range = loinc_ranges[loinc_codes.index(result['obx_observation_id'])] #result['obx_observation_ref_range']
                 # normal_test_items.lab_test_comment = result['obx_observation_result_status']
                 # idx+=1
-        for test in tests:
-                # print(test)
-                normal_test_items = lab_test.append('normal_test_items')
-                normal_test_items.lab_test_name = test
+        # for test in tests:
+        #         # print(test)
+        #         normal_test_items = lab_test.append('normal_test_items')
+        #         normal_test_items.lab_test_name = test
         lab_test.save(ignore_permissions=True)
         from frappe.model.workflow import apply_workflow
         if lab_test.get('workflow_state')=='Processing':
