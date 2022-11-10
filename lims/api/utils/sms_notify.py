@@ -31,4 +31,4 @@ def create_contact(employee_name):
         phone=doc.cell_number, is_primary_phone=1))
     contact.append('links', dict(link_doctype="Employee", link_name=doc.name))
     contact.insert()
-    notify_lab_employee_sms()
+    # notify_lab_employee_sms()

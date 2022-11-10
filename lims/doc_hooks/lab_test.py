@@ -197,23 +197,24 @@ def lab_clean():
 
 # bench execute lims.doc_hooks.lab_test.comment_count            
 def comment_count(name='B73'):
-    sqlc="select count(name) as cnt,reference_name from tabComment where reference_doctype='Lab Test' and reference_name is not null group by reference_name HAVING COUNT(name) > 2 order by reference_name limit 5"
-    parents=frappe.db.sql(sqlc,as_dict=1)
-    for p in parents:
-        print(p.reference_name, '  ',p.cnt)
-        sql = "select name,reference_doctype,reference_name from tabComment where reference_name='{0}' limit 3".format(p.reference_name)
-        print(sql)
-        items=frappe.db.sql(sql,as_dict=1)
-        count = 0
-        for i in items:
-            count +=1
-            if count>1:
-                print('item count ',count)
-                # sq= "delete from tabComment where name='{0}'".format(i.name)
-                # frappe.db.sql(sq,as_dict=1)
-                frappe.delete_doc('Comment',i.name)
-                frappe.db.commit()
-                # print(count)
+    return 1
+    # sqlc="select count(name) as cnt,reference_name from tabComment where reference_doctype='Lab Test' and reference_name is not null group by reference_name HAVING COUNT(name) > 2 order by reference_name limit 5"
+    # parents=frappe.db.sql(sqlc,as_dict=1)
+    # for p in parents:
+    #     print(p.reference_name, '  ',p.cnt)
+    #     sql = "select name,reference_doctype,reference_name from tabComment where reference_name='{0}' limit 3".format(p.reference_name)
+    #     print(sql)
+    #     items=frappe.db.sql(sql,as_dict=1)
+    #     count = 0
+    #     for i in items:
+    #         count +=1
+    #         if count>1:
+    #             print('item count ',count)
+    #             # sq= "delete from tabComment where name='{0}'".format(i.name)
+    #             # frappe.db.sql(sq,as_dict=1)
+    #             frappe.delete_doc('Comment',i.name)
+    #             frappe.db.commit()
+    #             # print(count)
 
  # bench execute lims.doc_hooks.lab_test.tetst_age_fix              
 def tetst_age_fix():
