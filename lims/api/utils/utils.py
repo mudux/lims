@@ -1,6 +1,7 @@
 from dataclasses import fields
 from unicodedata import name
 import frappe
+from frappe.utils.background_jobs import enqueue
 
 # bench execute lims.api.utils.utils.get_range_data
 def get_range_data(template_name,gender,age=0):
@@ -74,3 +75,46 @@ def get_range_data_test():
         print(result['lab_test_name'], ' ' ,range_str)
         frappe.db.set_value("Normal Test Result",result['name'],{'test_range':range_str})
         frappe.db.set_value("Normal Test Result",result['name'],{'normal_range':range_str})
+
+#  bench execute lims.api.utils.utils.update_workflow_decision
+def update_workflow_decision():
+    sql = "select name,decision,parent  from `tabApproval Log` where parenttype='Lab Test' and decision='Document Approved!'"
+    logs = frappe.db.sql(sql,as_dict=1)
+    for l in logs:
+        sq = "update `tabApproval Log` set decision = 'Results Posted' where name='{0}'".format(l.name)
+        print(l.name)
+        frappe.db.sql(sq,as_dict=1)
+
+#  bench execute lims.api.utils.utils.queue_tat
+
+def queue_tat():
+    enqueue(method=lab_test_tat_update, queue='long', timeout=7200)
+#  bench execute lims.api.utils.utils.lab_test_tat_update
+def lab_test_tat_update():
+    sql = "select name from `tabLab Test` where docstatus!=2 order by creation desc"
+    labs = frappe.db.sql(sql,as_dict=1)
+    for l in labs:
+        enqueue(method=tat_updates, lab_name=l.name,queue='long', timeout=7200)
+
+#  bench execute lims.api.utils.utils.tat_updates
+def tat_updates(lab_name):
+    # lab_name = "3HB"
+    sql = "select name,decision,parent,action_time  from `tabApproval Log` where parent='{0}' order by action_time".format(lab_name)
+    tals = frappe.db.sql(sql,as_dict=1)
+    cumulated_tat = 0
+    for idx,tal in enumerate(tals):
+        print(tal.decision,' ',tal.action_time,' ',idx)
+        # sq = "update `tabApproval Log` set tat =0 where name='{0}'".format(tal.name)
+        if idx>0:
+            minutes = "select TIMESTAMPDIFF(minute,'{0}','{1}') AS minutes".format(tals[idx-1].action_time,tal.action_time)
+            tat = frappe.db.sql(minutes,as_dict=1)
+            print(str(tat))
+            duration = tat[0].minutes
+            if duration>0:
+                cumulated_tat += duration
+            # cumulated_tat += cumulated_tat + abs(duration)
+            print('cumulated_tat ',cumulated_tat)
+            sq = "update `tabApproval Log` set tat ={0},cumulative_tat={1} where name='{2}'".format(tat[0].minutes,cumulated_tat,tal.name)
+            frappe.db.sql(sq,as_dict=1)
+        else:
+            pass
