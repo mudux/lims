@@ -118,3 +118,54 @@ def tat_updates(lab_name):
             frappe.db.sql(sq,as_dict=1)
         else:
             pass
+  
+
+#  IN  ('blood slide for malaria parasites','BLOOD FOR MALARIA PARASITES','BS FOP MPS','BS MPS SEEN',
+    # 'BLLOD SLIDE FOR MALARIA PARASITE','BLOOD SLIDE FOR MALARIA ANALYSIS','BLOOD FOR MA;LARIA PARASITES',
+    # 'BLOOD SLIDE FOR MALARISA PARASITE','OOD SLIDE FOR MALARIA PARASITE','MALARIA SLIDE','BLOOD SMEAR MPS'
+    # 'B/S FOR MPS.','BLOOD SLIDE FOR MALARIA SLIDE','MALARIA SLIDE','BLOOD SLIDE FOR MALARIA PARASDITE','BLOOD SMEAR',
+    # 'blood slide for malararia','MALARIA PARASITES','B/S FPR MPS','BS FOP MPS','BS FO MPS','Blood Slide for Malaria Screeninig',
+    # 'BS FOR VMPS','blood slides for malaria','MALARIA TEST','B\S','B\S FOR MPS','B/S FOR MPS','BLOOD SMEAR FOR MALARIA','blood slide of malaria','B/S FOR MPS')
+
+#  IN  ('MALARIA SLIDE','BS FOR MPS','BLIDE SLIDE FOR MALARIA','B/S FOR MPS.','BLOOD SMEAR MPS','BLOOD SLIDES OF MALARIA',
+# 'B\S FOR MPS','B\S','Blood Slide for Malaria Test','B/S FOR MPS','malaria blood slide','Blood slide for malaria screening',
+# 'B/S FOR MPS','BLOOD SLIDES','MALARIA','BLOOD SMEAR FOR MPS','BLOOD SMEAR FOR MALARIA TEST','blood slide for malaria',
+# 'blood slide','B/S','BLOOD FOR MALARIA PARASITE')
+# `tabNormal Test Result`, lab_test_name  `tabDescriptive Test Result` lab_test_particulars
+
+#  bench execute lims.api.utils.utils.malaria_clean_up
+def malaria_clean_up():
+    sql=""" select name,lab_test_particulars,parent  from  `tabDescriptive Test Result`
+    where lab_test_particulars 
+  IN  ('BLOOD FOR MALARIA PARASITE','B/S FOR MPS','B/S FOR MPS','B\S FOR MPS','B/S FOR MPS','B\S FOR MPS','B\S',
+'B/S FOR MPS.','BS FOR MPS','MALARIA SLIDE','BS FOR MPS','BLIDE SLIDE FOR MALARIA','B/S FOR MPS.','BLOOD SMEAR MPS','BLOOD SLIDES OF MALARIA',
+'B\S FOR MPS','B\S','Blood Slide for Malaria Test','B/S FOR MPS','malaria blood slide','Blood slide for malaria screening',
+'B/S FOR MPS','BLOOD SLIDES','MALARIA','BLOOD SMEAR FOR MPS','BLOOD SMEAR FOR MALARIA TEST','blood slide for malaria',
+'blood slide','B/S','BLOOD FOR MALARIA PARASITE','blood slide for malaria parasites','BLOOD FOR MALARIA PARASITES','BS FOP MPS','BS MPS SEEN',
+    'BLLOD SLIDE FOR MALARIA PARASITE','BLOOD SLIDE FOR MALARIA ANALYSIS','BLOOD FOR MA;LARIA PARASITES',
+    'BLOOD SLIDE FOR MALARISA PARASITE','OOD SLIDE FOR MALARIA PARASITE','MALARIA SLIDE','BLOOD SMEAR MPS'
+    'B/S FOR MPS.','BLOOD SLIDE FOR MALARIA SLIDE','MALARIA SLIDE','BLOOD SLIDE FOR MALARIA PARASDITE','BLOOD SMEAR',
+     'blood slide for malararia','MALARIA PARASITES','B/S FPR MPS','BS FOP MPS','BS FO MPS','Blood Slide for Malaria Screeninig',
+     'BS FOR VMPS','blood slides for malaria','MALARIA TEST','B\S','B\S FOR MPS','B/S FOR MPS','BLOOD SMEAR FOR MALARIA','blood slide of malaria','B/S FOR MPS'
+)
+    """
+    data = frappe.db.sql(sql,as_dict=1)
+    for d in data:
+        print(d.name)
+        sql2 = "Update `tabDescriptive Test Result` lab_test_name  set  ='BLOOD SLIDE FOR MALARIA PARASITE' where name='{0}'".format(d.name)
+        frappe.db.sql(sql2,as_dict=1)
+
+def rf_fix():
+    # rf factor test
+    sql=""" select name,lab_test_particulars,parent  from  `tabDescriptive Test Result`
+    where lab_test_particulars 
+    IN ( 'STOOL O/C','Stool for O/C','Stool Microscopy','STOOL FOR MICROSCOPY','stool','STOOL ANALYSIS','STOOL FOR O/C',
+   'STOOL FOR OC','STOOL FOR O/C ANALYSIS','STOOL FOR O/C.','STOOL FOR OVA AND CYST','SPECIAL STOOL MICROSCOPY FOR (ISOSPORA SPP AND OOCYSTS)',
+   'STOOL FOR OVA OR CYST','STOOL MICROSCOPY FOR OVUS/CYSTS','CONSISTENCY','MICROSCOPY','STOOL MICROSCOPY FOR O/C',
+   'STOOLFOR MICROSCOPY','COLOUR')
+    """
+    data = frappe.db.sql(sql,as_dict=1)
+    for d in data:
+        print(d.name)
+        sql2 = "Update  `tabNormal Test Result`   set lab_test_particulars ='STOOL MICROSCOPY FOR O/C' where name='{0}'".format(d.name)
+        frappe.db.sql(sql2,as_dict=1)

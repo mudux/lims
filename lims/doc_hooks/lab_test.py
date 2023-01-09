@@ -145,7 +145,7 @@ def get_sample_shares(lab_name):
             employee = e.employee
     for n in shares:
         print(n)
-        bulk_workflow_update(docname=n,process_lab=process_lab,employee=employee)
+        # bulk_workflow_update(docname=n,process_lab=process_lab,employee=employee)
         
 def bulk_workflow_update(docname,process_lab='',employee=''):
     from frappe.model.workflow import apply_workflow
