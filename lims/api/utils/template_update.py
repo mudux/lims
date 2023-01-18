@@ -1,5 +1,5 @@
 import frappe
-from erpnext.healthcare.doctype.lab_test_template.lab_test_template import make_item_price
+from healthcare.healthcare.doctype.lab_test_template.lab_test_template import make_item_price
 
 def update_template_to_descriptive():
     templates = frappe.db.get_all('Lab Test Template',filters={},fields=['name'])
@@ -15,7 +15,7 @@ def update_template_to_descriptive():
 # bench execute lims.api.utils.template_update.create_template_from_loinc
 def create_template_from_loinc(loinc_code=''):
     # description  = frappe.db.get_value('Loinc Code',{'name':loinc_code},'description')
-    description='Pro-Bnp'
+    description='Biofire'
     if description and not frappe.db.exists('Item', description):
         test_template = frappe.new_doc('Lab Test Template')
         test_template.lab_test_name = description
@@ -23,7 +23,7 @@ def create_template_from_loinc(loinc_code=''):
         test_template.lab_test_code = description
         test_template.lab_test_group = 'Lab Services'
         test_template.department = 'Nephrology'
-        test_template.lab_test_rate = 2000
+        test_template.lab_test_rate = 22000
         test_template.is_billable = 1
         test_template.disabled = 0
         test_template.lab_test_template_type = 'Single'

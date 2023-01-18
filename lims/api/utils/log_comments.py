@@ -1,7 +1,7 @@
 import frappe
 from frappe.desk.form.document_follow import follow_document
-from frappe.utils.file_manager import extract_images_from_html
-
+# from frappe.utils.file_manager import extract_images_from_html
+from frappe.core.doctype.file.utils import extract_images_from_html
 
 def add_comment(reference_name, reference_doctype,content):
     """allow any logged user to post a comment"""

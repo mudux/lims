@@ -1,5 +1,5 @@
 import json
-from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_collection
+from healthcare.healthcare.doctype.lab_test.lab_test import create_sample_collection
 import frappe
 from frappe.utils import getdate
 from lims.api.shoe4africa_lab.cobas_400 import get_lab_uom
