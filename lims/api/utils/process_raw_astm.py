@@ -91,8 +91,11 @@ def process_raw_astm_single(data=''):
         # log.unprocessed_result = str(x)
         # log.save(ignore_permissions=True)
         pass
+    
+# bench execute lims.api.utils.process_raw_astm.astm_debug
+
 def astm_debug():
-    raw_name = '0584c8df-cf8f'
+    raw_name = 'ce016893-9e04'
     raw_astm_doc = frappe.get_doc('Raw ASTM',raw_name)
     astm_data = raw_astm_doc.get('astm_data')
     parsed_data = ''

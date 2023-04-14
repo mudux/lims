@@ -13,9 +13,8 @@ def notify_lab_employee_sms(employee_name,message):
     else:
         create_contact(employee_name=employee_name)
 
-# bench execute clinical.hook.lab_test.create_contact
-
-def create_contact(employee_name):
+# bench execute lims.api.utils.sms_notify.create_contact
+def create_contact(employee_name=''):
     doc = frappe.get_doc('Employee',employee_name)
     contact = frappe.get_doc({
         "doctype": "Contact",
