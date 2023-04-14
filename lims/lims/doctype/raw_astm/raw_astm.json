@@ -59,7 +59,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-27 12:34:08.502362",
+ "modified": "2023-01-23 22:24:04.633393",
  "modified_by": "Administrator",
  "module": "Lims",
  "name": "Raw ASTM",
@@ -91,6 +91,5 @@
  "read_only": 1,
  "restrict_to_domain": "Healthcare",
  "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+ "sort_order": "DESC"
 }

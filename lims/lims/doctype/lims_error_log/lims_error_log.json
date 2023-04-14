@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2022-04-04 12:33:41.196472",
+ "creation": "2022-04-05 15:07:30.726900",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -42,7 +42,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-04 12:35:39.841653",
+ "modified": "2023-01-23 22:24:06.450781",
  "modified_by": "Administrator",
  "module": "Lims",
  "name": "Lims Error Log",
@@ -62,6 +62,5 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+ "sort_order": "DESC"
 }
