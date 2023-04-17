@@ -3,6 +3,7 @@ import frappe
 import json
 
 from lims.api.shoe4africa_lab.cobas_400 import process_astm_result, save_cobas_results
+from lims.api.shoe4africa_lab.sysmex import sysmex_append_to_lab_test
 
 # bench execute lims.api.utils.process_raw_astm.process_raw_astm
 def process_raw_astm():
@@ -31,6 +32,22 @@ def process_raw_astm():
                     log_name = save_cobas_results(orderResult = result_data['orderResult'],OrderCount=result_data['OrderCount'],ResultCount=result_data['ResultCount'])
                     print('log name ',str(log_name))
                     print('raw name-2 ',raw_name)
+                    frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': str(log_name),'is_processed':1})
+                    frappe.db.commit()
+                if data['lab_machine']=='SYSMEX-330-S4A':
+                    print('s4a sysmex')
+                    # raw_name = data['name'] #'a06e6641-c214'
+                    # raw_astm_doc  = frappe.get_doc('Raw ASTM', raw_name)
+                    astm_data = raw_astm_doc.get('astm_data')
+                    # print(astm_data)
+                    result_data = json.loads(astm_data[1:-1])
+                    lab_name = result_data['OrderNumber']
+                    patient = result_data['Patient']
+                    orders = result_data['Orders']
+                    results = result_data['Result']
+                    uoms = result_data['Uom']
+                    print(' patient ',patient,' lab_name ',lab_name)
+                    sysmex_append_to_lab_test(lab_name,orders,results,uoms)
                     frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': str(log_name),'is_processed':1})
                     frappe.db.commit()
             else:
