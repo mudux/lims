@@ -255,6 +255,51 @@ def import_loinc():
         # print("code {0} cnt {1}".format(code['Code'],count))
     # print('complete')
 
+# bench execute lims.api.shoe4africa_lab.cobas_400.process_cobas_raw_astm_results
+def process_cobas_raw_astm_results():
+    print('process_cobas_raw_astm_results')
+    field_list = ['lab_station','lab_machine','astm_data','name']
+    raw_astm  = frappe.get_all('Raw ASTM', filters={'is_processed': 0,'has_error':0,'lab_machine':'COBAS400-S4A'}, fields= field_list,order_by='creation asc',start=0,page_length=100)
+    print(len(raw_astm))
+    for data in raw_astm:
+        try:
+            raw_name = data['name'] #'a06e6641-c214'
+            raw_astm_doc  = frappe.get_doc('Raw ASTM', raw_name)
+            astm_data = raw_astm_doc.get('astm_data')
+            parsed_data = ''
+            if astm_data.startswith('"') and astm_data.endswith('"'):
+                # print('string here')
+                parsed_data = raw_astm_doc.get('astm_data')[1:-1]
+                # print(' lan parsed_data ',len(parsed_data))
+            else:
+                # print('raw json')
+                parsed_data = raw_astm_doc.get('astm_data')
+            if len(parsed_data)>100:
+                result_data = json.loads(parsed_data)
+                # print(data['lab_machine'])
+                # if data['lab_machine']=='COBAS400-S4A':
+                # print('cobas machine')
+                log_name = save_cobas_results(orderResult = result_data['orderResult'],OrderCount=result_data['OrderCount'],ResultCount=result_data['ResultCount'])
+                print('log name ',str(log_name))
+                print('raw name-2 ',raw_name)
+                frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': str(log_name),'is_processed':1})
+                frappe.db.commit()
+            else:
+                print('ERROR')
+                log  = frappe.new_doc('Lims Error Log')
+                log.ordernumber  = raw_name
+                log.log_number = raw_name
+                log.unprocessed_result = str(parsed_data)
+                log.save(ignore_permissions=True)
+                # frappe.db.set_value('Raw ASTM', raw_name,{'is_processed':1,'has_error':1})
+                frappe.db.sql("update `tabRaw ASTM` set is_processed=1,has_error=1 where name='{0}' ".format(raw_name))
+            print('end process_raw_astm')
+        except:
+            print('error processing cobas-400-s4a result data')
+        finally:
+            continue
+    return 1
+    
 # lab types posting to patient chart
 # 
 # def add_descriptive_result_items(test_name,results):
@@ -306,3 +351,12 @@ def import_loinc():
 #         idx+=1
 #     for i, item in enumerate(sorted(lab_test.sensitivity_test_items, key=lambda item: item.template), start=1):
 #         item.idx = i
+
+# bench execute lims.api.shoe4africa_lab.cobas_400.po_workflow
+
+def po_workflow():
+    from frappe.model.workflow import apply_workflow
+    # PUR-ORD-2023-04-22 20:07:04.515830  PUR-ORD-2023-04-22 19:07:23.626488
+    # Reinstate Document Forward for Approval 
+    doc = frappe.get_doc('Purchase Order','PUR-ORD-2023-04-22 19:07:23.626488')  
+    apply_workflow(doc=doc, action="Reinstate Document")

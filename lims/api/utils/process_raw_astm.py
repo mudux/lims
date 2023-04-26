@@ -1,15 +1,20 @@
 from ast import Pass
 import frappe
 import json
+from frappe.utils.background_jobs import enqueue
 
-from lims.api.shoe4africa_lab.cobas_400 import process_astm_result, save_cobas_results
-from lims.api.shoe4africa_lab.sysmex import sysmex_append_to_lab_test
+from lims.api.shoe4africa_lab.cobas_400 import process_astm_result, save_cobas_results,process_cobas_raw_astm_results
+from lims.api.shoe4africa_lab.sysmex import sysmex_append_to_lab_test,process_sysmex_astm
 
 # bench execute lims.api.utils.process_raw_astm.process_raw_astm
 def process_raw_astm():
+    process_cobas_raw_astm_results()
+    process_sysmex_astm()
+    
+def process_raw_astm_deprecated():
     # print('start process_raw_astm')
     field_list = ['lab_station','lab_machine','astm_data','name']
-    raw_astm  = frappe.get_all('Raw ASTM', filters={'is_processed': 0,'has_error':0}, fields= field_list,order_by='creation asc',start=0,page_length=10)
+    raw_astm  = frappe.get_all('Raw ASTM', filters={'is_processed': 0,'has_error':0,'lab_machine':'SYSMEX-330-S4A'}, fields= field_list,order_by='creation asc',start=0,page_length=100)
     # print("data {0}".format(len(raw_astm)))
     for data in raw_astm:
         try:
@@ -48,7 +53,9 @@ def process_raw_astm():
                     uoms = result_data['Uom']
                     print(' patient ',patient,' lab_name ',lab_name)
                     sysmex_append_to_lab_test(lab_name,orders,results,uoms)
-                    frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': str(log_name),'is_processed':1})
+                    # frappe.db.set_value('Raw ASTM', raw_name,{'astm_log': str(log_name),'is_processed':1})
+                    frappe.db.sql("update `tabRaw ASTM` set is_processed=1 where name='{0}' ".format(raw_name))
+                    print('closing raw astm ',raw_name)
                     frappe.db.commit()
             else:
                 print('ERROR')
@@ -57,7 +64,8 @@ def process_raw_astm():
                 log.log_number = raw_name
                 log.unprocessed_result = str(parsed_data)
                 log.save(ignore_permissions=True)
-                frappe.db.set_value('Raw ASTM', raw_name,{'is_processed':1,'has_error':1})
+                # frappe.db.set_value('Raw ASTM', raw_name,{'is_processed':1,'has_error':1})
+                frappe.db.sql("update `tabRaw ASTM` set is_processed=1,has_error=1 where name='{0}' ".format(raw_name))
                 pass
             print('end process_raw_astm')
         except:
