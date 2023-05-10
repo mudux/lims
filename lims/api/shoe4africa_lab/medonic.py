@@ -128,6 +128,8 @@ def get_template_name(analysis_name):
     else:
         return analysis_name
 
+# bench execute lims.api.shoe4africa_lab.medonic.get_template_name
+
 # def get_template_name(analysis_list,template_name):
 #     lab_test_code = frappe.db.get_all('Lab Test Codes',
 #     filters={'analysis':['IN',analysis_list],'lab_test_template':template_name},fields=['lab_test_template'])

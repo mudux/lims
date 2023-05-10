@@ -357,6 +357,7 @@ def process_cobas_raw_astm_results():
 def po_workflow():
     from frappe.model.workflow import apply_workflow
     # PUR-ORD-2023-04-22 20:07:04.515830  PUR-ORD-2023-04-22 19:07:23.626488
-    # Reinstate Document Forward for Approval 
-    doc = frappe.get_doc('Purchase Order','PUR-ORD-2023-04-22 19:07:23.626488')  
-    apply_workflow(doc=doc, action="Reinstate Document")
+    # Reinstate Document, Forward for Approval 
+    # 626488 -ex order
+    doc = frappe.get_doc('Externally Generated Purchase Order','toilet locks')  
+    apply_workflow(doc=doc, action="Confirm")
