@@ -2,6 +2,7 @@ import json
 import frappe
 from lims.api.shoe4africa_lab.urised import process_urised_hl7
 from lims.api.shoe4africa_lab.yumizen_550 import process_yumizen550_hl7
+from lims.api.emergency_lab.medonic import process_medonic_hl7
 
 # bench execute lims.api.utils.process_raw_hl7.file_exist
 # def file_exist():
@@ -12,6 +13,11 @@ from lims.api.shoe4africa_lab.yumizen_550 import process_yumizen550_hl7
  
 # bench execute lims.api.utils.process_raw_hl7.process_raw_hl7
 def process_raw_hl7():
+    # process_urised_hl7()
+    # process_yumizen550_hl7()
+    process_medonic_hl7()
+    
+def process_raw_hl722():
     field_list = ['lab_station','lab_machine','hl7_data','name']
     raw_hl7  = frappe.get_all('Raw HL7', filters={'is_processed': 0,'has_error':0}, fields= field_list,order_by='creation asc',start=0,page_length=10,)
     print("data {0}".format(len(raw_hl7)))
