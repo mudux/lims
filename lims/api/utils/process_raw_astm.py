@@ -5,11 +5,14 @@ from frappe.utils.background_jobs import enqueue
 
 from lims.api.shoe4africa_lab.cobas_400 import process_astm_result, save_cobas_results,process_cobas_raw_astm_results
 from lims.api.shoe4africa_lab.sysmex import sysmex_append_to_lab_test,process_sysmex_astm
+from lims.api.emergency_lab.sysmex330 import process_e_lab_sysmemx_astm
+
 
 # bench execute lims.api.utils.process_raw_astm.process_raw_astm
 def process_raw_astm():
     process_cobas_raw_astm_results()
     process_sysmex_astm()
+    process_e_lab_sysmemx_astm()
     
 def process_raw_astm_deprecated():
     # print('start process_raw_astm')

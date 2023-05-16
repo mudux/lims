@@ -169,3 +169,47 @@ def rf_fix():
         print(d.name)
         sql2 = "Update  `tabNormal Test Result`   set lab_test_particulars ='STOOL MICROSCOPY FOR O/C' where name='{0}'".format(d.name)
         frappe.db.sql(sql2,as_dict=1)
+        
+# #  bench execute lims.api.utils.utils.sysmex_ranges
+
+def sysmex_ranges():
+    return {
+        "WBC":"3.5 - 10.0",
+        "RBC": "3.80 - 6.00",
+        "HGB":"11.5 - 17.0",
+        "HCT":"35.0 - 52.0",
+        "MCV":"76.0 - 100.0",
+        "MCH":"27.0 - 34.0",
+        "MCHC":"32.0 - 35.0",
+        "PLT":"150 - 400",
+        "MPV":"8.0 - 11.0",
+        "NEUT#":"1.60 - 7.0",
+        "NEUT%":"40.0 - 73.0",
+        "LYMPH#":"1.0 - 3.0",
+        "LYMPH%":"15.0 - 45.0",
+        "MONO#":"0.2 - 0.8",
+        "MONO%":"4.0 - 12.0",
+        "EO#":"0.0 - 0.5",
+        "EO%":"0.5 - 7.0",
+        "BASO#":"0.0 - 0.50",
+        "BASO%":"0.0 - 2.0",
+        "IG#":"0.0 - 7.0",
+        "IG%":"0.0 - 72.0",
+        "RDW-SD":"37.0 - 54.0",
+        "RDW-CV":"11.0 - 17.0",
+        "PDW":"9.0 - 17.0",
+        "P-LCR":"13.0 - 43.0",
+        "PCT":"0.17 - 0.35",
+        "MICROR":"---",
+        "MACROR":"---"
+    }
+# #  bench execute lims.api.utils.utils.sys_rage_test
+def sys_rage_test():
+    labs = frappe.get_list("Lab Test",filters={'docstatus':1,'template':'FULL HAEMOGRAM'},fields=['name'],limit=1)
+    print(len(labs))  
+    normal_items =   frappe.get_list("Normal Test Result",filters={'parent':labs[0].get('name')},fields=['name','lab_test_name'])
+    print(len(normal_items))
+    range_dict = sysmex_ranges()
+    for item in normal_items:
+        print(item.lab_test_name,' ',range_dict[item.lab_test_name])
+        

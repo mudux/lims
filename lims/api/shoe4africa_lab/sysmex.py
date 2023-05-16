@@ -2,7 +2,7 @@ import json
 import frappe
 from lims.api.utils.log_comments import add_comment
 from frappe.model.workflow import apply_workflow
-
+from lims.api.utils.utils import sysmex_ranges
 
 @frappe.whitelist(allow_guest=True)
 def process_sysmex_hl7(HL7Message):
@@ -41,7 +41,7 @@ def process_sysmex_astm():
             sysmex_append_to_lab_test(lab_name,orders,results,uoms)
             frappe.db.sql("update `tabRaw ASTM` set is_processed=1,modified=now() where name='{0}' ".format(raw_name))
         except:
-            print('error processing sysmex-330-s4a result data')
+            print('error processing sysmex-330-s4a result data ')
             frappe.db.sql("update `tabRaw ASTM` set is_processed=1,has_error=1,modified=now() where name='{0}' ".format(raw_name))
         finally:
             continue
@@ -54,6 +54,8 @@ def sysmex_append_to_lab_test(lab_name,orders,results,uoms):
     lab_test = frappe.get_doc('Lab Test',lab_name)
     idx = 1
     # create_test_uom(uoms)
+    range_dict = sysmex_ranges()
+    # print(range_dict)
     for order in orders[1:]:
         # uom = words = uoms[idx].split('\/')
         # print(uom)
@@ -65,11 +67,12 @@ def sysmex_append_to_lab_test(lab_name,orders,results,uoms):
         normal_test_items.lab_test_event = order
         normal_test_items.result_value = "{0}".format(results[idx]) #,result['uom'])
         normal_test_items.lab_test_uom =  uoms[idx] #get_lab_uom(test_name)
-        normal_test_items.normal_range =  range_str #result['range']
-        normal_test_items.test_range =  range_str
+        normal_test_items.normal_range =  range_dict[order] #range_str #result['range']
+        normal_test_items.test_range =  range_dict[order] #range_str
         normal_test_items.lab_test_comment = 'NA'
         # lab_test.save(ignore_permissions=True)
         idx+=1
+        print(idx,' ', range_dict[order])
     lab_test.save(ignore_permissions=True)
     print('finish appending sysmex')
     if lab_test.get('workflow_state')=='Processing':
