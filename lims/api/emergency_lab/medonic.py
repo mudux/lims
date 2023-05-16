@@ -117,14 +117,14 @@ def process_medonic_data(HL7Message,raw_name):
     }
     frappe.db.set_value('HL7 Message Logs', message_log.get('name'),{'result_data': json.dumps(results)})
     if frappe.db.exists("Patient",{'name':obr_universal_service_id}):
-        create_pmr(result_data=result_table,patient=obr_universal_service_id)
+        create_pmr(result_data=result_table,sample_number=obr_filler_order_sample_number,patient=obr_universal_service_id)
   
     
-def create_pmr(result_data,patient):
+def create_pmr(result_data,sample_number,patient):
     patient_record = frappe.new_doc('Patient Medical Record')
-    patient_record.subject = '<strong>Full Hemogram Results: </strong>' + '\n'
+    # patient_record.subject = '<strong>Full Hemogram Results sample #({0}): </strong>'.format(sample_number) + '\n' + '\n'
     patient_record.patient = patient
-    patient_record.subject += '\n' + result_data
+    patient_record.subject =  '<strong>Full Hemogram Results sample #({0}): </strong><br>'.format(sample_number) + '\n' + result_data
     patient_record.reference_doctype = 'Lab Test'
     patient_record.reference_name = '6X2' #doc.get('name')
     patient_record.reference_owner = frappe.session.user
