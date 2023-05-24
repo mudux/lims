@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-05-24 08:37:16.314105",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "test_name",
+  "blood_group"
+ ],
+ "fields": [
+  {
+   "default": "BLOODGROUP AND RHESUS GROUPING (CELLGROUPING) (FORWARD)",
+   "fieldname": "test_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Test Name",
+   "options": "Lab Test",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blood_group",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Blood Group",
+   "options": "Unknown\nA+\nA-\nB+\nB-\nAB+\nAB-\nO+\nO-",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-05-24 09:29:47.093348",
+ "modified_by": "Administrator",
+ "module": "Lims",
+ "name": "BTU Result",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

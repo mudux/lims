@@ -212,4 +212,32 @@ def sys_rage_test():
     range_dict = sysmex_ranges()
     for item in normal_items:
         print(item.lab_test_name,' ',range_dict[item.lab_test_name])
+
+def check_for_result_data(docname):
+     return frappe.db.count('Custom Lab Results', {'parent': docname}) > 0 and not frappe.db.count('Sensitivity Test Result', {'parent': docname}) > 0 and not frappe.db.count('Organism Test Result', {'parent': docname}) > 0 and not frappe.db.count('Descriptive Test Result', {'parent': docname}) > 0 and not frappe.db.count('Normal Test Result', {'parent': docname}) > 0
+    
         
+#  bench execute lims.api.utils.utils.awaiting_verification_cleanup
+def awaiting_verification_cleanup():
+    from clinical.hook.lab_test import lab_test_submit_post_custom_results    
+    # labs = frappe.get_list("Lab Test",filters={'workflow_state':'Processing'},fields=['name'],limit=5000)
+    labs =  frappe.get_all("Lab Test",fields=['name'],filters=[ ['Lab Test','workflow_state','=','Draft'],['Lab Test','_comments','is','set']])
+    print(len(labs))  
+    count = 0
+    for lab in labs:
+        # if not check_for_result_data(lab.name):
+        #     # sql = "Update `tabLab Test` set workflow_state='Posted',docstatus=1 where name='{0}'".format(lab.name)
+        #     # sql = "select now()"
+        #     # frappe.db.sql(sql,as_dict=1)
+        #     print('no result')
+        # else:
+        if frappe.db.count('Custom Lab Results', {'parent': lab.name}) > 0:
+            print('Processing with results')
+            doc = frappe.get_doc('Lab Test',lab.name)
+            lab_test_submit_post_custom_results(doc,'')
+            sql = "Update `tabLab Test` set workflow_state='Posted',docstatus=1 where name='{0}'".format(lab.name)
+            frappe.db.sql(sql,as_dict=1)
+            print(count)
+            count+=1
+        
+            

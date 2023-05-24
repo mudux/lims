@@ -24,7 +24,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Result",
-   "options": "\nREACTIVE\nNON-REACTIVE\nPOSITIVE\nNEGATIVE\nDETECTED\nNOT DETECTED\nCOLOR\nCONSISTENCY\nMICROSCOPY\nMPS SEEN\nNO MPS SEEN",
+   "options": "\nREACTIVE\nNON-REACTIVE\nPOSITIVE\nNEGATIVE\nDETECTED\nNOT DETECTED\nCOLOR\nCONSISTENCY\nMICROSCOPY\nMPS SEEN\nNO MPS SEEN\nCOMPATIBLE\nINCOMPATIBLE",
    "reqd": 1
   },
   {
@@ -44,7 +44,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-23 22:24:05.963478",
+ "modified": "2023-05-22 11:41:18.949505",
  "modified_by": "Administrator",
  "module": "Lims",
  "name": "Custom Lab Results",
